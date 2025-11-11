@@ -2,10 +2,10 @@ export interface Investment {
   id: string;
   userId: string;
   name: string;
-  type: InvestmentType;
+  category: InvestmentCategory;
   initialAmount: number;
   currentBalance: number;
-  maturityDate: string;
+  StartDate: string;
   returnRate: number;
   status: InvestmentStatus;
   description?: string;
@@ -13,16 +13,17 @@ export interface Investment {
   updatedAt: string;
 }
 
-export type InvestmentType = 'STOCKS' | 'BONDS' | 'REAL_ESTATE' | 'CRYPTO' | 'MUTUAL_FUNDS' | 'OTHER';
+export type InvestmentCategory = 'STOCKS' | 'BONDS' | 'REAL_ESTATE' | 'CRYPTO' | 'MUTUAL_FUNDS' | 'OTHER';
 
 export type InvestmentStatus = 'ACTIVE' | 'CLOSED' | 'PENDING';
 
 export interface CreateInvestmentData {
   name: string;
-  type: InvestmentType;
+  category: InvestmentCategory;
   initialAmount: number;
-  maturityDate: string;
+  startDate: string;
   returnRate: number;
+  returnType: string;
   description?: string;
 }
 
@@ -33,7 +34,7 @@ export interface UpdateInvestmentData extends Partial<CreateInvestmentData> {
 
 export interface InvestmentFilters {
   search?: string;
-  type?: InvestmentType;
+  category?: InvestmentCategory;
   status?: InvestmentStatus;
   sortBy?: 'name' | 'initialAmount' | 'currentBalance' | 'returnRate' | 'createdAt';
   sortOrder?: 'asc' | 'desc';

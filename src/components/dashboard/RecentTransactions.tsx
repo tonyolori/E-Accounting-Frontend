@@ -22,10 +22,18 @@ export default function RecentTransactions() {
     const fetchRecentTransactions = async () => {
       try {
         setIsLoading(true);
-        const response = await apiService.get<{success: boolean; data: Transaction[]}>('/api/transactions/recent?limit=5');
-        
-        if (response.data.success) {
-          setTransactions(response.data.data);
+        const response = await apiService.get<{ success: boolean; data: Transaction[] | { transactions: Transaction[] } }>(
+          '/api/transactions/recent?limit=5'
+        );
+
+        if (response.data && response.data.success) {
+          const raw = response.data.data;
+          const items: Transaction[] = Array.isArray(raw)
+            ? (raw as Transaction[])
+            : Array.isArray((raw as any)?.transactions)
+              ? (raw as any).transactions
+              : [];
+          setTransactions(items);
         } else {
           throw new Error('Failed to fetch recent transactions');
         }

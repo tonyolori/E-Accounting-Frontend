@@ -22,10 +22,10 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
   
   const [formData, setFormData] = useState({
     name: investment?.name || '',
-    type: investment?.type || '',
+    category: investment?.category || '',
     initialAmount: investment?.initialAmount?.toString() || '',
     currentBalance: investment?.currentBalance?.toString() || '',
-    maturityDate: investment?.maturityDate ? investment.maturityDate.split('T')[0] : '',
+    StartDate: investment?.StartDate ? investment.StartDate.split('T')[0] : '',
     returnRate: investment?.returnRate?.toString() || '',
     status: investment?.status || 'ACTIVE',
     description: investment?.description || '',
@@ -41,8 +41,8 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
       newErrors.name = 'Investment name is required';
     }
 
-    if (!formData.type) {
-      newErrors.type = 'Investment type is required';
+    if (!formData.category) {
+      newErrors.category = 'Investment category is required';
     }
 
     if (!formData.initialAmount || parseFloat(formData.initialAmount) <= 0) {
@@ -53,14 +53,8 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
       newErrors.currentBalance = 'Current balance must be greater than 0';
     }
 
-    if (!formData.maturityDate) {
-      newErrors.maturityDate = 'Maturity date is required';
-    } else {
-      const maturityDate = new Date(formData.maturityDate);
-      const today = new Date();
-      if (maturityDate <= today) {
-        newErrors.maturityDate = 'Maturity date must be in the future';
-      }
+    if (!formData.StartDate) {
+      newErrors.StartDate = 'Start date is required';
     }
 
     if (!formData.returnRate || parseFloat(formData.returnRate) < 0) {
@@ -83,10 +77,11 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
     try {
       const submitData: CreateInvestmentData = {
         name: formData.name.trim(),
-        type: formData.type as any,
+        category: formData.category as any,
         initialAmount: parseFloat(formData.initialAmount),
-        maturityDate: formData.maturityDate,
+        startDate: formData.StartDate,
         returnRate: parseFloat(formData.returnRate),
+        returnType: 'FIXED',//get this from the form,
         description: formData.description.trim() || undefined,
       };
 
@@ -140,15 +135,15 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
           {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
         </div>
 
-        {/* Investment Type */}
+        {/* Investment Category */}
         <div>
-          <Label htmlFor="type">Investment Type *</Label>
+          <Label htmlFor="type">Investment Category *</Label>
           <Select
             id="type"
             options={INVESTMENT_TYPE_OPTIONS}
-            value={formData.type}
-            onChange={(e) => handleInputChange('type', e.target.value)}
-            placeholder="Select investment type"
+            value={formData.category}
+            onChange={(e) => handleInputChange('category', e.target.value)}
+            placeholder="Select investment Category"
             className={errors.type ? 'border-red-300' : ''}
             required
           />
@@ -205,18 +200,18 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
           </div>
         )}
 
-        {/* Maturity Date */}
+        {/* Start Date */}
         <div>
-          <Label htmlFor="maturityDate">Maturity Date *</Label>
+          <Label htmlFor="StartDate">Start Date *</Label>
           <Input
-            id="maturityDate"
+            id="StartDate"
             type="date"
-            value={formData.maturityDate}
-            onChange={(e) => handleInputChange('maturityDate', e.target.value)}
-            className={errors.maturityDate ? 'border-red-300' : ''}
+            value={formData.StartDate}
+            onChange={(e) => handleInputChange('StartDate', e.target.value)}
+            className={errors.StartDate ? 'border-red-300' : ''}
             required
           />
-          {errors.maturityDate && <p className="text-sm text-red-600 mt-1">{errors.maturityDate}</p>}
+          {errors.StartDate && <p className="text-sm text-red-600 mt-1">{errors.StartDate}</p>}
         </div>
 
         {/* Return Rate */}

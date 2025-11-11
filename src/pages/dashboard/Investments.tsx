@@ -58,10 +58,10 @@ export default function Investments() {
           id: '1',
           userId: 'user-1',
           name: 'Tech Growth Fund',
-          type: 'STOCKS',
+          category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,
-          maturityDate: '2024-12-31',
+          StartDate: '2024-12-31',
           returnRate: 15.2,
           status: 'ACTIVE',
           description: 'Technology sector growth investment',
@@ -72,10 +72,10 @@ export default function Investments() {
           id: '2',
           userId: 'user-1',
           name: 'Government Bonds',
-          type: 'BONDS',
+          category: 'BONDS',
           initialAmount: 5000,
           currentBalance: 5200,
-          maturityDate: '2025-06-30',
+          StartDate: '2025-06-30',
           returnRate: 4.2,
           status: 'ACTIVE',
           description: 'Safe government bond investment',
@@ -86,10 +86,10 @@ export default function Investments() {
           id: '3',
           userId: 'user-1',
           name: 'Real Estate REIT',
-          type: 'REAL_ESTATE',
+          category: 'REAL_ESTATE',
           initialAmount: 15000,
           currentBalance: 16800,
-          maturityDate: '2026-01-15',
+          StartDate: '2026-01-15',
           returnRate: 8.5,
           status: 'ACTIVE',
           description: 'Real estate investment trust',
@@ -205,8 +205,8 @@ export default function Investments() {
             <label className="block text-sm font-medium text-gray-700 mb-2">Type</label>
             <Select
               options={[{ value: '', label: 'All Types' }, ...INVESTMENT_TYPE_OPTIONS]}
-              value={filters.type || ''}
-              onChange={(e) => handleFilterChange('type', e.target.value || undefined)}
+              value={filters.category || ''}
+              onChange={(e) => handleFilterChange('category', e.target.value || undefined)}
               placeholder="Filter by type"
             />
           </div>
@@ -273,11 +273,11 @@ export default function Investments() {
               <Search className="h-12 w-12 text-gray-400 mx-auto mb-4" />
               <h3 className="text-sm font-medium text-gray-900">No investments found</h3>
               <p className="mt-1 text-sm text-gray-500">
-                {filters.search || filters.type || filters.status
+                {filters.search || filters.category || filters.status
                   ? 'Try adjusting your filters or search terms.'
                   : 'Get started by creating your first investment.'}
               </p>
-              {!filters.search && !filters.type && !filters.status && (
+              {!filters.search && !filters.category && !filters.status && (
                 <div className="mt-6">
                   <Button onClick={() => setIsAddModalOpen(true)}>
                     <Plus className="h-4 w-4 mr-2" />

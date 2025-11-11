@@ -13,7 +13,7 @@ export const investmentService = {
     const params = new URLSearchParams();
     
     if (filters.search) params.append('search', filters.search);
-    if (filters.type) params.append('type', filters.type);
+    if (filters.category) params.append('type', filters.category);
     if (filters.status) params.append('status', filters.status);
     if (filters.sortBy) params.append('sortBy', filters.sortBy);
     if (filters.sortOrder) params.append('sortOrder', filters.sortOrder);

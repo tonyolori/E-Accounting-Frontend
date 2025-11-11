@@ -51,7 +51,7 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
     }
   };
 
-  const getTypeColor = (type: Investment['type']) => {
+  const getTypeColor = (type: Investment['category']) => {
     switch (type) {
       case 'STOCKS':
         return 'bg-blue-100 text-blue-800 border-blue-200';
@@ -73,7 +73,7 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
   const isProfit = profit >= 0;
 
   const today = new Date();
-  const maturityDate = new Date(investment.maturityDate);
+  const maturityDate = new Date(investment.StartDate);
   const daysToMaturity = Math.ceil((maturityDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   return (
@@ -83,9 +83,9 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
         <div>
           <h2 className="text-2xl font-bold text-gray-900">{investment.name}</h2>
           <div className="flex items-center space-x-2 mt-2">
-            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTypeColor(investment.type)}`}>
+            <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getTypeColor(investment.category)}`}>
               <Tag className="h-3 w-3 mr-1" />
-              {investment.type.replace('_', ' ')}
+              {investment.category.replace('_', ' ')}
             </span>
             <span className={`inline-flex items-center px-3 py-1 rounded-full text-sm font-medium border ${getStatusColor(investment.status)}`}>
               {investment.status}
@@ -186,7 +186,7 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
               <Calendar className="h-5 w-5 text-gray-400 mr-3" />
               <div>
                 <dt className="text-sm font-medium text-gray-500">Maturity Date</dt>
-                <dd className="text-sm text-gray-900">{formatDate(investment.maturityDate)}</dd>
+                <dd className="text-sm text-gray-900">{formatDate(investment.StartDate)}</dd>
                 <dd className={`text-xs ${daysToMaturity > 0 ? 'text-gray-500' : 'text-red-600'}`}>
                   {daysToMaturity > 0 ? `${daysToMaturity} days remaining` : 'Matured'}
                 </dd>

@@ -100,6 +100,7 @@ export default function Register() {
         lastName: formData.lastName.trim(),
         email: formData.email,
         password: formData.password,
+        confirmPassword: formData.confirmPassword,
       });
       // Redirect will be handled by the app based on auth state
       navigate('/dashboard');

@@ -40,7 +40,7 @@ export default function InvestmentCard({ investment, onView, onEdit, onDelete }:
     }
   };
 
-  const getTypeColor = (type: Investment['type']) => {
+  const getTypeColor = (type: Investment['category']) => {
     switch (type) {
       case 'STOCKS':
         return 'bg-blue-100 text-blue-800';
@@ -113,8 +113,8 @@ export default function InvestmentCard({ investment, onView, onEdit, onDelete }:
 
         {/* Tags */}
         <div className="flex items-center space-x-2 mb-4">
-          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(investment.type)}`}>
-            {investment.type.replace('_', ' ')}
+          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getTypeColor(investment.category)}`}>
+            {investment.category.replace('_', ' ')}
           </span>
           <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${getStatusColor(investment.status)}`}>
             {investment.status}
@@ -163,10 +163,10 @@ export default function InvestmentCard({ investment, onView, onEdit, onDelete }:
           </div>
         </div>
 
-        {/* Maturity Date */}
+        {/* Start Date */}
         <div className="flex items-center text-sm text-gray-500">
           <Calendar className="h-4 w-4 mr-1" />
-          <span>Matures {formatDate(investment.maturityDate)}</span>
+          <span>Started {formatDate(investment.StartDate)}</span>
         </div>
       </div>
 

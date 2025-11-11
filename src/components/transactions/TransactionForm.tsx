@@ -124,7 +124,7 @@ export default function TransactionForm({ transaction, investments, onSuccess, o
             id="investmentId"
             options={[
               { value: '', label: 'Select an investment' },
-              ...investments.map(inv => ({ value: inv.id, label: `${inv.name} (${inv.type})` }))
+              ...investments.map(inv => ({ value: inv.id, label: `${inv.name} (${inv.category})` }))
             ]}
             value={formData.investmentId}
             onChange={(e) => handleInputChange('investmentId', e.target.value)}

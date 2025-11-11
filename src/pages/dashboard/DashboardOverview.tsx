@@ -94,8 +94,12 @@ export default function DashboardOverview() {
     }).format(amount);
   };
 
-  const formatPercent = (percent: number) => {
-    return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
+  const formatPercent = (percent?: number | null) => {
+    if (percent === null || percent === undefined || isNaN(Number(percent))) {
+      return '0.00%';
+    }
+    const val = Number(percent);
+    return `${val >= 0 ? '+' : ''}${val.toFixed(2)}%`;
   };
 
   if (isLoading) {
@@ -142,7 +146,7 @@ export default function DashboardOverview() {
                         Total Investments
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {dashboardData.overview.totalInvestments}
+                        {dashboardData?.overview?.totalInvestments ?? 0}
                       </dd>
                     </dl>
                   </div>
@@ -162,7 +166,7 @@ export default function DashboardOverview() {
                         Portfolio Value
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {formatCurrency(dashboardData.overview.totalValue)}
+                        {formatCurrency(dashboardData?.overview?.totalValue ?? 0)}
                       </dd>
                     </dl>
                   </div>
@@ -182,14 +186,14 @@ export default function DashboardOverview() {
                         Total Returns
                       </dt>
                       <dd className={`text-lg font-medium ${
-                        dashboardData.overview.totalReturns >= 0 ? 'text-green-600' : 'text-red-600'
+                        (dashboardData?.overview?.totalReturns ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
                       }`}>
-                        {formatCurrency(dashboardData.overview.totalReturns)}
+                        {formatCurrency(dashboardData?.overview?.totalReturns ?? 0)}
                       </dd>
                     </dl>
                   </div>
                   <div className="ml-2">
-                    {dashboardData.overview.totalReturns >= 0 ? (
+                    {(dashboardData?.overview?.totalReturns ?? 0) >= 0 ? (
                       <ArrowUpRight className="h-4 w-4 text-green-600" />
                     ) : (
                       <ArrowDownRight className="h-4 w-4 text-red-600" />
@@ -211,7 +215,7 @@ export default function DashboardOverview() {
                         Active Investments
                       </dt>
                       <dd className="text-lg font-medium text-gray-900">
-                        {dashboardData.overview.activeInvestments}
+                        {dashboardData?.overview?.activeInvestments ?? 0}
                       </dd>
                     </dl>
                   </div>
@@ -228,12 +232,12 @@ export default function DashboardOverview() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Monthly Change</p>
                     <p className={`text-2xl font-bold ${
-                      dashboardData.performance.monthlyChange >= 0 ? 'text-green-600' : 'text-red-600'
+                      (dashboardData?.performance?.monthlyChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {formatPercent(dashboardData.performance.monthlyChange)}
+                      {formatPercent(dashboardData?.performance?.monthlyChange)}
                     </p>
                   </div>
-                  {dashboardData.performance.monthlyChange >= 0 ? (
+                  {(dashboardData?.performance?.monthlyChange ?? 0) >= 0 ? (
                     <ArrowUpRight className="h-8 w-8 text-green-600" />
                   ) : (
                     <ArrowDownRight className="h-8 w-8 text-red-600" />
@@ -248,12 +252,12 @@ export default function DashboardOverview() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Yearly Change</p>
                     <p className={`text-2xl font-bold ${
-                      dashboardData.performance.yearlyChange >= 0 ? 'text-green-600' : 'text-red-600'
+                      (dashboardData?.performance?.yearlyChange ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
                     }`}>
-                      {formatPercent(dashboardData.performance.yearlyChange)}
+                      {formatPercent(dashboardData?.performance?.yearlyChange)}
                     </p>
                   </div>
-                  {dashboardData.performance.yearlyChange >= 0 ? (
+                  {(dashboardData?.performance?.yearlyChange ?? 0) >= 0 ? (
                     <ArrowUpRight className="h-8 w-8 text-green-600" />
                   ) : (
                     <ArrowDownRight className="h-8 w-8 text-red-600" />
@@ -268,10 +272,10 @@ export default function DashboardOverview() {
                   <div>
                     <p className="text-sm font-medium text-gray-500">Best Performer</p>
                     <p className="text-lg font-semibold text-gray-900 truncate">
-                      {dashboardData.performance.bestPerformer.name}
+                      {dashboardData?.performance?.bestPerformer?.name ?? '-'}
                     </p>
                     <p className="text-sm text-green-600">
-                      {formatPercent(dashboardData.performance.bestPerformer.returnRate)}
+                      {formatPercent(dashboardData?.performance?.bestPerformer?.returnRate)}
                     </p>
                   </div>
                   <Award className="h-8 w-8 text-yellow-500" />
@@ -289,7 +293,7 @@ export default function DashboardOverview() {
             
             <div className="bg-white shadow rounded-lg p-6">
               <h3 className="text-lg font-medium text-gray-900 mb-4">Asset Allocation</h3>
-              <AssetAllocationChart data={dashboardData.assetAllocation} />
+              <AssetAllocationChart data={dashboardData?.assetAllocation ?? {}} />
             </div>
           </div>
 

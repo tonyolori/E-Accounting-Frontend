@@ -48,8 +48,12 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
     }).format(amount);
   };
 
-  const formatPercent = (percent: number) => {
-    return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
+  const formatPercent = (percent?: number | null) => {
+    if (percent === null || percent === undefined || isNaN(Number(percent))) {
+      return '0.00%';
+    }
+    const val = Number(percent);
+    return `${val >= 0 ? '+' : ''}${val.toFixed(2)}%`;
   };
 
   return (
