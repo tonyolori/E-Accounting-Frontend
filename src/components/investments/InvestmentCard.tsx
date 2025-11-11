@@ -1,7 +1,7 @@
 import React from 'react';
-import { Eye, Edit, Trash2, TrendingUp, TrendingDown, Calendar, DollarSign } from 'lucide-react';
-import { Investment } from '../../types/investment';
+import { DollarSign, TrendingUp, TrendingDown, Calendar, Eye, Edit, Trash2, Target } from 'lucide-react';
 import { Button } from '../ui/button';
+import { Investment } from '../../types/investment';
 
 interface InvestmentCardProps {
   investment: Investment;
@@ -159,14 +159,24 @@ export default function InvestmentCard({ investment, onView, onEdit, onDelete }:
             </span>
           </div>
           <div className="text-sm text-gray-500">
-            {investment.returnRate.toFixed(2)}% return rate
+            {investment.returnType === 'FIXED' ? (
+              <span className="flex items-center">
+                <Target className="h-3 w-3 mr-1" />
+                {investment.returnRate?.toFixed(2) || '0.00'}% fixed
+              </span>
+            ) : (
+              <span className="flex items-center">
+                <TrendingUp className="h-3 w-3 mr-1" />
+                {investment.returnRate?.toFixed(2) || 'Variable'}% variable
+              </span>
+            )}
           </div>
         </div>
 
         {/* Start Date */}
         <div className="flex items-center text-sm text-gray-500">
           <Calendar className="h-4 w-4 mr-1" />
-          <span>Started {formatDate(investment.StartDate)}</span>
+          <span>Started {formatDate(investment.startDate)}</span>
         </div>
       </div>
 

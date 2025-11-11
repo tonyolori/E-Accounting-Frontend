@@ -135,8 +135,9 @@ export default function Returns() {
           category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,
-          StartDate: '2024-12-31',
+          startDate: '2024-01-01',
           returnRate: 15.2,
+          returnType: 'VARIABLE',
           status: 'ACTIVE',
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z'

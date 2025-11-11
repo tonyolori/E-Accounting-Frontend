@@ -161,8 +161,9 @@ export default function Transactions() {
           category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,
-          StartDate: '2024-12-31',
+          startDate: '2024-01-01',
           returnRate: 15.2,
+          returnType: 'VARIABLE',
           status: 'ACTIVE',
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z'
@@ -174,8 +175,9 @@ export default function Transactions() {
           category: 'BONDS',
           initialAmount: 5000,
           currentBalance: 5200,
-          StartDate: '2025-06-30',
+          startDate: '2024-01-02',
           returnRate: 4.2,
+          returnType: 'FIXED',
           status: 'ACTIVE',
           createdAt: '2024-01-01T00:00:00.000Z',
           updatedAt: '2024-01-01T00:00:00.000Z'

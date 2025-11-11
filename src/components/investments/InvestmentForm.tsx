@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -7,6 +7,7 @@ import {
   Investment, 
   CreateInvestmentData, 
   INVESTMENT_TYPE_OPTIONS, 
+  INVESTMENT_RETURN_TYPE_OPTIONS,
   INVESTMENT_STATUS_OPTIONS 
 } from '../../types/investment';
 import { investmentService } from '../../services/investmentService';
@@ -25,8 +26,9 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
     category: investment?.category || '',
     initialAmount: investment?.initialAmount?.toString() || '',
     currentBalance: investment?.currentBalance?.toString() || '',
-    StartDate: investment?.StartDate ? investment.StartDate.split('T')[0] : '',
+    startDate: investment?.startDate ? investment.startDate.split('T')[0] : '',
     returnRate: investment?.returnRate?.toString() || '',
+    returnType: investment?.returnType || 'FIXED',
     status: investment?.status || 'ACTIVE',
     description: investment?.description || '',
   });
@@ -49,16 +51,35 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
       newErrors.initialAmount = 'Initial amount must be greater than 0';
     }
 
+    // Only validate currentBalance in edit mode
     if (isEditMode && (!formData.currentBalance || parseFloat(formData.currentBalance) <= 0)) {
       newErrors.currentBalance = 'Current balance must be greater than 0';
     }
 
-    if (!formData.StartDate) {
-      newErrors.StartDate = 'Start date is required';
+    if (!formData.startDate) {
+      newErrors.startDate = 'Start date is required';
     }
 
-    if (!formData.returnRate || parseFloat(formData.returnRate) < 0) {
-      newErrors.returnRate = 'Return rate must be 0 or greater';
+    if (!formData.returnType) {
+      newErrors.returnType = 'Return type is required';
+    }
+
+    // Only validate returnRate if returnType is FIXED
+    if (formData.returnType === 'FIXED') {
+      if (!formData.returnRate || formData.returnRate.trim() === '') {
+        newErrors.returnRate = 'Interest rate is required for fixed return investments';
+      } else if (parseFloat(formData.returnRate) < 0) {
+        newErrors.returnRate = 'Interest rate cannot be negative';
+      } else if (parseFloat(formData.returnRate) > 100) {
+        newErrors.returnRate = 'Interest rate cannot exceed 100%';
+      }
+    } else if (formData.returnRate && formData.returnRate.trim() !== '') {
+      // For VARIABLE type, if provided, still validate range
+      if (parseFloat(formData.returnRate) < 0) {
+        newErrors.returnRate = 'Interest rate cannot be negative';
+      } else if (parseFloat(formData.returnRate) > 100) {
+        newErrors.returnRate = 'Interest rate cannot exceed 100%';
+      }
     }
 
     setErrors(newErrors);
@@ -79,9 +100,11 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
         name: formData.name.trim(),
         category: formData.category as any,
         initialAmount: parseFloat(formData.initialAmount),
-        startDate: formData.StartDate,
-        returnRate: parseFloat(formData.returnRate),
-        returnType: 'FIXED',//get this from the form,
+        startDate: formData.startDate,
+        returnType: formData.returnType as any,
+        returnRate: formData.returnRate && formData.returnRate.trim() !== '' 
+          ? parseFloat(formData.returnRate) 
+          : null,
         description: formData.description.trim() || undefined,
       };
 
@@ -92,9 +115,14 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
           status: formData.status as any,
         });
       } else {
-        await investmentService.createInvestment(submitData);
+        // For new investments, set currentBalance to initialAmount
+        const createData = {
+          ...submitData,
+          currentBalance: parseFloat(formData.initialAmount)
+        };
+        await investmentService.createInvestment(createData);
       }
-
+      
       onSuccess();
     } catch (error) {
       console.error('Failed to save investment:', error);
@@ -144,10 +172,30 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             value={formData.category}
             onChange={(e) => handleInputChange('category', e.target.value)}
             placeholder="Select investment Category"
-            className={errors.type ? 'border-red-300' : ''}
+            className={errors.category ? 'border-red-300' : ''}
             required
           />
-          {errors.type && <p className="text-sm text-red-600 mt-1">{errors.type}</p>}
+          {errors.category && <p className="text-sm text-red-600 mt-1">{errors.category}</p>}
+        </div>
+
+        {/* Return Type */}
+        <div>
+          <Label htmlFor="returnType">Return Type *</Label>
+          <Select
+            id="returnType"
+            options={INVESTMENT_RETURN_TYPE_OPTIONS}
+            value={formData.returnType}
+            onChange={(e) => handleInputChange('returnType', e.target.value)}
+            placeholder="Select return type"
+            className={errors.returnType ? 'border-red-300' : ''}
+            required
+          />
+          {errors.returnType && <p className="text-sm text-red-600 mt-1">{errors.returnType}</p>}
+          <p className="text-xs text-gray-500 mt-1">
+            {formData.returnType === 'FIXED' 
+              ? 'Fixed return investments require a specific interest rate.'
+              : 'Variable return investments have fluctuating returns.'}
+          </p>
         </div>
 
         {/* Status (Edit mode only) */}
@@ -202,33 +250,44 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
 
         {/* Start Date */}
         <div>
-          <Label htmlFor="StartDate">Start Date *</Label>
+          <Label htmlFor="startDate">Start Date *</Label>
           <Input
-            id="StartDate"
+            id="startDate"
             type="date"
-            value={formData.StartDate}
-            onChange={(e) => handleInputChange('StartDate', e.target.value)}
-            className={errors.StartDate ? 'border-red-300' : ''}
+            value={formData.startDate}
+            onChange={(e) => handleInputChange('startDate', e.target.value)}
+            className={errors.startDate ? 'border-red-300' : ''}
             required
           />
-          {errors.StartDate && <p className="text-sm text-red-600 mt-1">{errors.StartDate}</p>}
+          {errors.startDate && <p className="text-sm text-red-600 mt-1">{errors.startDate}</p>}
         </div>
 
         {/* Return Rate */}
         <div>
-          <Label htmlFor="returnRate">Expected Return Rate (%) *</Label>
+          <Label htmlFor="returnRate">
+            {formData.returnType === 'FIXED' ? 'Interest Rate (%) *' : 'Expected Return Rate (%)'}
+            {formData.returnType === 'FIXED' && (
+              <span className="text-xs text-gray-500 ml-1">(Required for fixed returns)</span>
+            )}
+          </Label>
           <Input
             id="returnRate"
             type="number"
             step="0.01"
             min="0"
+            max="100"
             value={formData.returnRate}
             onChange={(e) => handleInputChange('returnRate', e.target.value)}
-            placeholder="0.00"
+            placeholder={formData.returnType === 'FIXED' ? 'Enter interest rate' : 'Optional - leave empty for variable returns'}
             className={errors.returnRate ? 'border-red-300' : ''}
-            required
+            required={formData.returnType === 'FIXED'}
           />
           {errors.returnRate && <p className="text-sm text-red-600 mt-1">{errors.returnRate}</p>}
+          {formData.returnType === 'VARIABLE' && (
+            <p className="text-xs text-gray-500 mt-1">
+              Optional: Provide an estimated return rate for reference. Variable returns fluctuate based on market conditions.
+            </p>
+          )}
         </div>
 
         {/* Description */}

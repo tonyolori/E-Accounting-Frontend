@@ -78,6 +78,12 @@ export default function DeleteConfirmModal({ isOpen, onClose, investment, onSucc
                   <span className="text-sm text-gray-900">{investment.category.replace('_', ' ')}</span>
                 </div>
                 <div className="flex justify-between">
+                  <span className="text-sm font-medium text-gray-700">Return Type:</span>
+                  <span className="text-sm text-gray-900">
+                    {investment.returnType === 'FIXED' ? 'Fixed Return' : 'Variable Return'}
+                  </span>
+                </div>
+                <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-700">Current Balance:</span>
                   <span className="text-sm text-gray-900">{formatCurrency(investment.currentBalance)}</span>
                 </div>

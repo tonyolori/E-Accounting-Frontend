@@ -53,7 +53,7 @@ export default function Investments() {
       console.error('Failed to fetch investments:', error);
       setError('Failed to load investments');
       // Mock data for development
-      setInvestments([
+      const mockInvestments: Investment[] = [
         {
           id: '1',
           userId: 'user-1',
@@ -61,12 +61,13 @@ export default function Investments() {
           category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,
-          StartDate: '2024-12-31',
+          startDate: '2024-01-01',
           returnRate: 15.2,
+          returnType: 'VARIABLE',
           status: 'ACTIVE',
           description: 'Technology sector growth investment',
-          createdAt: '2024-01-15T10:00:00.000Z',
-          updatedAt: '2024-01-15T10:00:00.000Z'
+          createdAt: '2024-01-01T00:00:00.000Z',
+          updatedAt: '2024-01-15T10:30:00.000Z',
         },
         {
           id: '2',
@@ -75,12 +76,13 @@ export default function Investments() {
           category: 'BONDS',
           initialAmount: 5000,
           currentBalance: 5200,
-          StartDate: '2025-06-30',
+          startDate: '2024-01-02',
           returnRate: 4.2,
+          returnType: 'FIXED',
           status: 'ACTIVE',
           description: 'Safe government bond investment',
-          createdAt: '2024-01-10T14:30:00.000Z',
-          updatedAt: '2024-01-10T14:30:00.000Z'
+          createdAt: '2024-01-02T00:00:00.000Z',
+          updatedAt: '2024-01-10T14:20:00.000Z',
         },
         {
           id: '3',
@@ -89,14 +91,16 @@ export default function Investments() {
           category: 'REAL_ESTATE',
           initialAmount: 15000,
           currentBalance: 16800,
-          StartDate: '2026-01-15',
+          startDate: '2024-01-03',
           returnRate: 8.5,
+          returnType: 'VARIABLE',
           status: 'ACTIVE',
           description: 'Real estate investment trust',
-          createdAt: '2024-01-05T09:15:00.000Z',
-          updatedAt: '2024-01-05T09:15:00.000Z'
-        }
-      ]);
+          createdAt: '2024-01-03T00:00:00.000Z',
+          updatedAt: '2024-01-12T09:15:00.000Z',
+        },
+      ];
+      setInvestments(mockInvestments);
       setPagination({
         page: 1,
         limit: 10,

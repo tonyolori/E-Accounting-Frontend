@@ -1,7 +1,20 @@
 import React from 'react';
-import { Edit, Trash2, Calendar, DollarSign, TrendingUp, Tag, FileText, Clock } from 'lucide-react';
-import { Investment } from '../../types/investment';
+import { 
+  DollarSign, 
+  TrendingUp, 
+  TrendingDown, 
+  Calendar, 
+  Tag, 
+  Activity,
+  Target,
+  Edit,
+  Trash2,
+  X,
+  FileText,
+  Clock
+} from 'lucide-react';
 import { Button } from '../ui/button';
+import { Investment } from '../../types/investment';
 
 interface InvestmentDetailProps {
   investment: Investment;
@@ -73,7 +86,7 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
   const isProfit = profit >= 0;
 
   const today = new Date();
-  const maturityDate = new Date(investment.StartDate);
+  const maturityDate = new Date(investment.startDate);
   const daysToMaturity = Math.ceil((maturityDate.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
 
   return (
@@ -165,12 +178,21 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
         <div className="bg-white border border-gray-200 rounded-lg p-6">
           <div className="flex items-center">
             <div className="flex-shrink-0">
-              <TrendingUp className="h-6 w-6 text-purple-600" />
+              {investment.returnType === 'FIXED' ? (
+                <Target className="h-6 w-6 text-purple-600" />
+              ) : (
+                <TrendingUp className="h-6 w-6 text-purple-600" />
+              )}
             </div>
             <div className="ml-4">
-              <dt className="text-sm font-medium text-gray-500">Return Rate</dt>
+              <dt className="text-sm font-medium text-gray-500">
+                {investment.returnType === 'FIXED' ? 'Interest Rate' : 'Return Rate'}
+              </dt>
               <dd className="text-2xl font-bold text-gray-900">
-                {investment.returnRate.toFixed(2)}%
+                {investment.returnRate?.toFixed(2) || 'Variable'}%
+              </dd>
+              <dd className="text-sm text-gray-500">
+                {investment.returnType === 'FIXED' ? 'Fixed return' : 'Variable return'}
               </dd>
             </div>
           </div>
@@ -185,10 +207,10 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
             <div className="flex items-center">
               <Calendar className="h-5 w-5 text-gray-400 mr-3" />
               <div>
-                <dt className="text-sm font-medium text-gray-500">Maturity Date</dt>
-                <dd className="text-sm text-gray-900">{formatDate(investment.StartDate)}</dd>
-                <dd className={`text-xs ${daysToMaturity > 0 ? 'text-gray-500' : 'text-red-600'}`}>
-                  {daysToMaturity > 0 ? `${daysToMaturity} days remaining` : 'Matured'}
+                <dt className="text-sm font-medium text-gray-500">Start Date</dt>
+                <dd className="text-sm text-gray-900">{formatDate(investment.startDate)}</dd>
+                <dd className="text-xs text-gray-500">
+                  Investment started on this date
                 </dd>
               </div>
             </div>
@@ -227,7 +249,7 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
               <span className="text-sm text-gray-500">Expected Return</span>
               <span className="text-sm font-medium text-gray-900">
-                {investment.returnRate.toFixed(2)}%
+                {investment.returnRate?.toFixed(2) || 'Variable'}%
               </span>
             </div>
             <div className="flex justify-between items-center py-2">
