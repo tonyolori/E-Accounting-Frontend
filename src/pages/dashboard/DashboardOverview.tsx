@@ -1,8 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { 
-  TrendingUp, 
   DollarSign, 
-  Target, 
   Activity, 
   ArrowUpRight, 
   ArrowDownRight,
@@ -35,21 +33,114 @@ interface DashboardData {
   assetAllocation: {
     [key: string]: number;
   };
+  currencyTotals?: CurrencyTotal[];
 }
+
+interface CurrencyTotal {
+  currency: string;
+  totalPrincipal: number;
+  totalCurrentValue: number;
+  totalReturns: number;
+  count: number;
+}
+
+interface ApiDashboardResponse {
+  success: boolean;
+  message: string;
+  data: ApiDashboardData;
+}
+
+interface ApiDashboardData {
+  portfolio: {
+    totalInvestments: number;
+    ratesAt: string;
+    totalPrincipalBase: number;
+    totalCurrentValueBase: number;
+    totalReturnsBase: number;
+  };
+  assetAllocation: {
+    [key: string]: number;
+  };
+  totalsByCurrency: Array<{
+    currency: string;
+    totalPrincipal: number | string;
+    totalCurrentValue: number | string;
+    totalReturns: number;
+    count: number;
+  }>;
+  topPerformers: Array<{
+    id: string;
+    name: string;
+    initialAmount: number | string;
+    currentBalance: number | string;
+    returnType: string;
+    status: string;
+    startDate: string;
+    absoluteReturn: number;
+    returnPercentage: number;
+    annualizedReturn: number;
+  }>;
+  generatedAt: string;
+}
+
+const mapApiToDashboardData = (api: ApiDashboardData): DashboardData => {
+  const totalValueBase = Number(api?.portfolio?.totalCurrentValueBase ?? 0);
+  const totalReturnsBase = Number(api?.portfolio?.totalReturnsBase ?? 0);
+
+  const performers = Array.isArray(api?.topPerformers) ? api.topPerformers : [];
+  const best = performers.length
+    ? performers.reduce((acc, cur) =>
+        Number(cur.returnPercentage ?? 0) > Number(acc.returnPercentage ?? 0) ? cur : acc
+      )
+    : undefined;
+
+  const currencyTotals: CurrencyTotal[] = Array.isArray(api?.totalsByCurrency)
+    ? api.totalsByCurrency.map((c) => ({
+        currency: c.currency,
+        totalPrincipal: Number(c.totalPrincipal ?? 0),
+        totalCurrentValue: Number(c.totalCurrentValue ?? 0),
+        totalReturns: Number(c.totalReturns ?? 0),
+        count: Number(c.count ?? 0),
+      }))
+    : [];
+
+  return {
+    overview: {
+      totalInvestments: Number(api?.portfolio?.totalInvestments ?? 0),
+      totalValue: totalValueBase,
+      totalReturns: totalReturnsBase,
+      activeInvestments: (api?.totalsByCurrency || []).reduce((sum, c) => sum + Number(c.count || 0), 0),
+    },
+    performance: {
+      monthlyChange: 0,
+      yearlyChange: 0,
+      bestPerformer: {
+        id: best?.id ?? '',
+        name: best?.name ?? '-',
+        returnRate: Number(best?.returnPercentage ?? 0),
+      },
+    },
+    assetAllocation: api?.assetAllocation || {},
+    currencyTotals,
+  };
+};
 
 export default function DashboardOverview() {
   const [dashboardData, setDashboardData] = useState<DashboardData | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [currencyCode, setCurrencyCode] = useState('USD');
 
   useEffect(() => {
     const fetchDashboardData = async () => {
       try {
         setIsLoading(true);
-        const response = await apiService.get<{success: boolean; data: DashboardData}>('/api/reports/dashboard');
+        const response = await apiService.get<ApiDashboardResponse>('/api/reports/dashboard');
         
         if (response.data.success) {
-          setDashboardData(response.data.data);
+          const apiData = response.data.data;
+          setCurrencyCode(apiData?.totalsByCurrency?.[0]?.currency || 'USD');
+          setDashboardData(mapApiToDashboardData(apiData));
         } else {
           throw new Error('Failed to fetch dashboard data');
         }
@@ -87,10 +178,10 @@ export default function DashboardOverview() {
     fetchDashboardData();
   }, []);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, currencyOverride?: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currencyOverride || currencyCode,
     }).format(amount);
   };
 
@@ -132,77 +223,8 @@ export default function DashboardOverview() {
 
       {dashboardData && (
         <>
-          {/* Stats Cards */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-8">
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <TrendingUp className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Investments
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {dashboardData?.overview?.totalInvestments ?? 0}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <DollarSign className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Portfolio Value
-                      </dt>
-                      <dd className="text-lg font-medium text-gray-900">
-                        {formatCurrency(dashboardData?.overview?.totalValue ?? 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                </div>
-              </div>
-            </div>
-
-            <div className="bg-white overflow-hidden shadow rounded-lg">
-              <div className="p-5">
-                <div className="flex items-center">
-                  <div className="flex-shrink-0">
-                    <Target className="h-6 w-6 text-gray-400" />
-                  </div>
-                  <div className="ml-5 w-0 flex-1">
-                    <dl>
-                      <dt className="text-sm font-medium text-gray-500 truncate">
-                        Total Returns
-                      </dt>
-                      <dd className={`text-lg font-medium ${
-                        (dashboardData?.overview?.totalReturns ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
-                      }`}>
-                        {formatCurrency(dashboardData?.overview?.totalReturns ?? 0)}
-                      </dd>
-                    </dl>
-                  </div>
-                  <div className="ml-2">
-                    {(dashboardData?.overview?.totalReturns ?? 0) >= 0 ? (
-                      <ArrowUpRight className="h-4 w-4 text-green-600" />
-                    ) : (
-                      <ArrowDownRight className="h-4 w-4 text-red-600" />
-                    )}
-                  </div>
-                </div>
-              </div>
-            </div>
-
+          {/* Active Investments Card */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mb-6">
             <div className="bg-white overflow-hidden shadow rounded-lg">
               <div className="p-5">
                 <div className="flex items-center">
@@ -222,6 +244,43 @@ export default function DashboardOverview() {
                 </div>
               </div>
             </div>
+          </div>
+
+          {/* Currency Totals Cards */}
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
+            {(dashboardData?.currencyTotals ?? []).map((ct) => (
+              <div key={ct.currency} className="bg-white overflow-hidden shadow rounded-lg">
+                <div className="p-5">
+                  <div className="flex items-center justify-between">
+                    <div>
+                      <div className="text-sm font-medium text-gray-500 truncate">Currency</div>
+                      <div className="text-xl font-semibold text-gray-900">{ct.currency}</div>
+                    </div>
+                    <DollarSign className="h-6 w-6 text-gray-400" />
+                  </div>
+                  <div className="grid grid-cols-2 gap-4 mt-4">
+                    <div>
+                      <div className="text-xs text-gray-500">Investments</div>
+                      <div className="text-base font-medium text-gray-900">{ct.count}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Principal</div>
+                      <div className="text-base font-medium text-gray-900">{formatCurrency(ct.totalPrincipal, ct.currency)}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Current Value</div>
+                      <div className="text-base font-medium text-gray-900">{formatCurrency(ct.totalCurrentValue, ct.currency)}</div>
+                    </div>
+                    <div>
+                      <div className="text-xs text-gray-500">Returns</div>
+                      <div className={`text-base font-medium ${(ct.totalReturns ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                        {formatCurrency(ct.totalReturns, ct.currency)}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ))}
           </div>
 
           {/* Performance Summary */}
