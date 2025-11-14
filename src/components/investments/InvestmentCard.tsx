@@ -12,9 +12,9 @@ interface InvestmentCardProps {
 
 export default function InvestmentCard({ investment, onView, onEdit, onDelete }: InvestmentCardProps) {
   const formatCurrency = (amount: number) => {
-    return new Intl.NumberFormat('en-US', {
+    return new Intl.NumberFormat(undefined, {
       style: 'currency',
-      currency: 'USD',
+      currency: investment.currency,
     }).format(amount);
   };
 

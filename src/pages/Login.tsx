@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { isAxiosError } from 'axios';
 import { Link, useNavigate } from 'react-router-dom';
 import { Eye, EyeOff, LogIn, Mail, Lock } from 'lucide-react';
 import { Button } from '../components/ui/button';
@@ -60,8 +61,51 @@ export default function Login() {
       // Redirect will be handled by the app based on auth state
       navigate('/dashboard');
     } catch (error: unknown) {
-      const errorMessage = error instanceof Error ? error.message : 'Login failed. Please try again.';
-      setErrors({ general: errorMessage });
+      let errorMessage = 'Login failed. Please try again.';
+      let fieldErrors: Partial<FormErrors> | null = null;
+
+      if (isAxiosError(error)) {
+        const status = error.response?.status;
+        const data: any = error.response?.data;
+        const serverMessage: string | undefined = data?.message || data?.error;
+
+        // Prefer server message when available
+        if (serverMessage) {
+          errorMessage = serverMessage;
+        } else if (status === 401) {
+          errorMessage = 'Invalid email or password.';
+        } else if (status === 400) {
+          errorMessage = 'Invalid request. Please check your input.';
+        } else if (status && status >= 500) {
+          errorMessage = 'Server error. Please try again later.';
+        }
+
+        // Map structured field errors if provided
+        if (data?.errors && typeof data.errors === 'object') {
+          // Shape: { email: '...', password: '...' }
+          fieldErrors = {
+            email: typeof data.errors.email === 'string' ? data.errors.email : undefined,
+            password: typeof data.errors.password === 'string' ? data.errors.password : undefined,
+          };
+        } else if (Array.isArray(data?.details)) {
+          // Likely Joi validation: [{ message, path: ['email'] }, ...]
+          const acc: Partial<FormErrors> = {};
+          for (const d of data.details) {
+            const path = Array.isArray(d?.path) ? d.path[0] : d?.context?.key;
+            if (path === 'email' && typeof d?.message === 'string') acc.email = d.message;
+            if (path === 'password' && typeof d?.message === 'string') acc.password = d.message;
+          }
+          if (Object.keys(acc).length > 0) fieldErrors = acc;
+        }
+      } else if (error instanceof Error) {
+        errorMessage = error.message;
+      }
+
+      if (fieldErrors) {
+        setErrors({ general: errorMessage, ...fieldErrors });
+      } else {
+        setErrors({ general: errorMessage });
+      }
     } finally {
       setIsSubmitting(false);
     }

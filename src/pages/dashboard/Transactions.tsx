@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Calendar, DollarSign, BarChart3, SortAsc, SortDesc, Filter } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, SortAsc, SortDesc } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
@@ -48,7 +48,7 @@ export default function Transactions() {
   const [selectedTransaction, setSelectedTransaction] = useState<Transaction | null>(null);
 
   // Fetch transactions
-  const fetchTransactions = async () => {
+  const fetchTransactions = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await transactionService.getTransactions(filters);
@@ -143,10 +143,10 @@ export default function Transactions() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
 
   // Fetch investments for the form
-  const fetchInvestments = async () => {
+  const fetchInvestments = useCallback(async () => {
     try {
       const response = await investmentService.getInvestments({ limit: 100 });
       setInvestments(response.data.investments);
@@ -158,6 +158,7 @@ export default function Transactions() {
           id: 'inv-1',
           userId: 'user-1',
           name: 'Tech Growth Fund',
+          currency: 'USD',
           category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,
@@ -172,6 +173,7 @@ export default function Transactions() {
           id: 'inv-2',
           userId: 'user-1',
           name: 'Government Bonds',
+          currency: 'USD',
           category: 'BONDS',
           initialAmount: 5000,
           currentBalance: 5200,
@@ -184,12 +186,12 @@ export default function Transactions() {
         }
       ]);
     }
-  };
+  }, []);
 
   useEffect(() => {
     fetchTransactions();
     fetchInvestments();
-  }, [filters]);
+  }, [fetchTransactions, fetchInvestments]);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof TransactionFilters, value: any) => {

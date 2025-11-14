@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Plus, Search, Filter, Edit, Trash2, Eye, SortAsc, SortDesc } from 'lucide-react';
+import React, { useState, useEffect, useCallback } from 'react';
+import { Plus, Search, Edit, Trash2, Eye, SortAsc, SortDesc, DollarSign } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
@@ -8,10 +8,10 @@ import {
   Investment, 
   InvestmentFilters, 
   INVESTMENT_TYPE_OPTIONS, 
-  INVESTMENT_STATUS_OPTIONS 
+  INVESTMENT_STATUS_OPTIONS, 
+  CURRENCY_OPTIONS
 } from '../../types/investment';
 import { investmentService } from '../../services/investmentService';
-import InvestmentCard from '../../components/investments/InvestmentCard';
 import InvestmentForm from '../../components/investments/InvestmentForm';
 import InvestmentDetail from '../../components/investments/InvestmentDetail';
 import DeleteConfirmModal from '../../components/investments/DeleteConfirmModal';
@@ -40,9 +40,15 @@ export default function Investments() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
+  const [isUpdateBalanceOpen, setIsUpdateBalanceOpen] = useState(false);
+  const [investmentToUpdate, setInvestmentToUpdate] = useState<Investment | null>(null);
+  const [balanceValue, setBalanceValue] = useState<string>('');
+  const [balanceReason, setBalanceReason] = useState<string>('');
+  const [balanceIsSubmitting, setBalanceIsSubmitting] = useState(false);
+  const [balanceError, setBalanceError] = useState<string | null>(null);
 
   // Fetch investments
-  const fetchInvestments = async () => {
+  const fetchInvestments = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await investmentService.getInvestments(filters);
@@ -58,6 +64,7 @@ export default function Investments() {
           id: '1',
           userId: 'user-1',
           name: 'Tech Growth Fund',
+          currency: 'USD',
           category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,
@@ -73,6 +80,7 @@ export default function Investments() {
           id: '2',
           userId: 'user-1',
           name: 'Government Bonds',
+          currency: 'USD',
           category: 'BONDS',
           initialAmount: 5000,
           currentBalance: 5200,
@@ -88,6 +96,7 @@ export default function Investments() {
           id: '3',
           userId: 'user-1',
           name: 'Real Estate REIT',
+          currency: 'NGN',
           category: 'REAL_ESTATE',
           initialAmount: 15000,
           currentBalance: 16800,
@@ -110,11 +119,11 @@ export default function Investments() {
     } finally {
       setIsLoading(false);
     }
-  };
+  }, [filters]);
 
   useEffect(() => {
     fetchInvestments();
-  }, [filters]);
+  }, [fetchInvestments]);
 
   // Handle filter changes
   const handleFilterChange = (key: keyof InvestmentFilters, value: any) => {
@@ -168,6 +177,39 @@ export default function Investments() {
     setIsDeleteModalOpen(true);
   };
 
+  const openUpdateBalance = (investment: Investment) => {
+    setInvestmentToUpdate(investment);
+    setBalanceValue(String(investment.currentBalance ?? ''));
+    setBalanceReason('');
+    setBalanceError(null);
+    setIsUpdateBalanceOpen(true);
+  };
+
+  const handleSubmitUpdateBalance = async () => {
+    if (!investmentToUpdate) return;
+    const parsed = parseFloat(balanceValue);
+    if (Number.isNaN(parsed) || parsed < 0) {
+      setBalanceError('Please enter a valid amount greater than or equal to 0');
+      return;
+    }
+    try {
+      setBalanceIsSubmitting(true);
+      setBalanceError(null);
+      await investmentService.updateInvestmentBalanceManual(
+        investmentToUpdate.id,
+        parsed,
+        balanceReason || undefined
+      );
+      setIsUpdateBalanceOpen(false);
+      setInvestmentToUpdate(null);
+      await fetchInvestments();
+    } catch (e) {
+      setBalanceError('Failed to update balance. Please try again.');
+    } finally {
+      setBalanceIsSubmitting(false);
+    }
+  };
+
   return (
     <div>
       {/* Header */}
@@ -188,7 +230,7 @@ export default function Investments() {
 
       {/* Filters */}
       <div className="bg-white shadow rounded-lg p-6 mb-6">
-        <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+        <div className="grid grid-cols-1 md:grid-cols-5 gap-4">
           <div>
             <label className="block text-sm font-medium text-gray-700 mb-2">Search</label>
             <div className="relative">
@@ -222,6 +264,16 @@ export default function Investments() {
               value={filters.status || ''}
               onChange={(e) => handleFilterChange('status', e.target.value || undefined)}
               placeholder="Filter by status"
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-2">Currency</label>
+            <Select
+              options={[{ value: '', label: 'All Currencies' }, ...CURRENCY_OPTIONS]}
+              value={filters.currency || ''}
+              onChange={(e) => handleFilterChange('currency', e.target.value || undefined)}
+              placeholder="Filter by currency"
             />
           </div>
 
@@ -294,17 +346,144 @@ export default function Investments() {
         </div>
       ) : (
         <>
-          {/* Investment Grid */}
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-8">
-            {investments.map((investment) => (
-              <InvestmentCard
-                key={investment.id}
-                investment={investment}
-                onView={() => handleViewDetails(investment)}
-                onEdit={() => handleEdit(investment)}
-                onDelete={() => handleDelete(investment)}
-              />
-            ))}
+          {/* Investments Table */}
+          <div className="bg-white shadow rounded-lg overflow-hidden mb-8">
+            <div className="overflow-x-auto">
+              <table className="min-w-full divide-y divide-gray-200">
+                <thead className="bg-gray-50">
+                  <tr>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSortChange('name')}>
+                      <div className="flex items-center space-x-1">
+                        <span>Name</span>
+                        {filters.sortBy === 'name' && (
+                          filters.sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Type</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Status</th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Currency</th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSortChange('initialAmount')}>
+                      <div className="flex items-center justify-end space-x-1">
+                        <span>Initial Amount</span>
+                        {filters.sortBy === 'initialAmount' && (
+                          filters.sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSortChange('currentBalance')}>
+                      <div className="flex items-center justify-end space-x-1">
+                        <span>Current Balance</span>
+                        {filters.sortBy === 'currentBalance' && (
+                          filters.sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSortChange('returnRate')}>
+                      <div className="flex items-center justify-end space-x-1">
+                        <span>Return Rate</span>
+                        {filters.sortBy === 'returnRate' && (
+                          filters.sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
+                        )}
+                      </div>
+                    </th>
+                    <th scope="col" className="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Start Date</th>
+                    <th scope="col" className="relative px-6 py-3">
+                      <span className="sr-only">Actions</span>
+                    </th>
+                  </tr>
+                </thead>
+                <tbody className="bg-white divide-y divide-gray-200">
+                  {investments.map((investment) => {
+                    const formatAmount = (amount: number, currency: string) => new Intl.NumberFormat(undefined, { style: 'currency', currency }).format(amount);
+                    const formatDate = (dateString: string) => new Date(dateString).toLocaleDateString('en-US', { year: 'numeric', month: 'short', day: 'numeric' });
+                    const statusClasses = investment.status === 'ACTIVE'
+                      ? 'bg-green-100 text-green-800'
+                      : investment.status === 'CLOSED'
+                        ? 'bg-gray-100 text-gray-800'
+                        : 'bg-yellow-100 text-yellow-800';
+                    return (
+                      <tr key={investment.id} className="hover:bg-gray-50">
+                        <td className="px-6 py-4 whitespace-nowrap text-sm font-medium text-gray-900">
+                          <div className="flex flex-col">
+                            <span className="truncate max-w-[280px]">{investment.name}</span>
+                            {investment.description && (
+                              <span className="text-xs text-gray-500 truncate max-w-[320px]">{investment.description}</span>
+                            )}
+                          </div>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                            {investment.category.replace('_', ' ')}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <span className={`inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium ${statusClasses}`}>
+                            {investment.status}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-700">
+                          <span className="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-gray-100 text-gray-800">
+                            {investment.currency}
+                          </span>
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatAmount(investment.initialAmount, investment.currency)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {formatAmount(investment.currentBalance, investment.currency)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
+                          {investment.returnRate != null ? `${investment.returnRate.toFixed(2)}%` : '—'}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
+                          {formatDate(investment.startDate)}
+                        </td>
+                        <td className="px-6 py-4 whitespace-nowrap text-right text-sm font-medium">
+                          <div className="flex items-center justify-end space-x-1">
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleViewDetails(investment)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Eye className="h-4 w-4" />
+                            </Button>
+                            {investment.returnType === 'VARIABLE' && (
+                              <Button
+                                variant="ghost"
+                                size="sm"
+                                onClick={() => openUpdateBalance(investment)}
+                                className="h-8 w-8 p-0"
+                                title="Update Balance"
+                              >
+                                <DollarSign className="h-4 w-4" />
+                              </Button>
+                            )}
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleEdit(investment)}
+                              className="h-8 w-8 p-0"
+                            >
+                              <Edit className="h-4 w-4" />
+                            </Button>
+                            <Button
+                              variant="ghost"
+                              size="sm"
+                              onClick={() => handleDelete(investment)}
+                              className="h-8 w-8 p-0 text-red-600 hover:text-red-700"
+                            >
+                              <Trash2 className="h-4 w-4" />
+                            </Button>
+                          </div>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
           </div>
 
           {/* Pagination */}
@@ -420,6 +599,60 @@ export default function Investments() {
         investment={selectedInvestment}
         onSuccess={handleDeleteSuccess}
       />
+
+      <Modal
+        isOpen={isUpdateBalanceOpen}
+        onClose={() => setIsUpdateBalanceOpen(false)}
+        title="Update Balance"
+        className="max-w-md"
+      >
+        <div className="space-y-4">
+          {investmentToUpdate && (
+            <div className="text-sm text-gray-600">
+              <div className="font-medium text-gray-900 mb-1">{investmentToUpdate.name}</div>
+              <div>Current balance: {new Intl.NumberFormat(undefined, { style: 'currency', currency: investmentToUpdate.currency }).format(investmentToUpdate.currentBalance)}</div>
+            </div>
+          )}
+
+          {balanceError && (
+            <div className="text-sm text-red-600">{balanceError}</div>
+          )}
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">New Balance</label>
+            <Input
+              type="number"
+              inputMode="decimal"
+              step="0.01"
+              min="0"
+              placeholder="Enter new balance"
+              value={balanceValue}
+              onChange={(e) => setBalanceValue(e.target.value)}
+              disabled={balanceIsSubmitting}
+            />
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
+            <Input
+              type="text"
+              placeholder="e.g. Market adjustment or manual correction"
+              value={balanceReason}
+              onChange={(e) => setBalanceReason(e.target.value)}
+              disabled={balanceIsSubmitting}
+            />
+          </div>
+
+          <div className="flex justify-end space-x-2 pt-2">
+            <Button variant="outline" onClick={() => setIsUpdateBalanceOpen(false)} disabled={balanceIsSubmitting}>
+              Cancel
+            </Button>
+            <Button onClick={handleSubmitUpdateBalance} disabled={balanceIsSubmitting}>
+              {balanceIsSubmitting ? 'Updating...' : 'Update Balance'}
+            </Button>
+          </div>
+        </div>
+      </Modal>
     </div>
   );
 }

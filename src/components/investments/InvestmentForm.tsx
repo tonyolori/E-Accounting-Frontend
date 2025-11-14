@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from 'react';
+import { isAxiosError } from 'axios';
 import { Button } from '../ui/button';
 import { Input } from '../ui/input';
 import { Label } from '../ui/label';
@@ -8,7 +9,8 @@ import {
   CreateInvestmentData, 
   INVESTMENT_TYPE_OPTIONS, 
   INVESTMENT_RETURN_TYPE_OPTIONS,
-  INVESTMENT_STATUS_OPTIONS 
+  INVESTMENT_STATUS_OPTIONS,
+  CURRENCY_OPTIONS 
 } from '../../types/investment';
 import { investmentService } from '../../services/investmentService';
 
@@ -23,6 +25,7 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
   
   const [formData, setFormData] = useState({
     name: investment?.name || '',
+    currency: investment?.currency || 'NGN',
     category: investment?.category || '',
     initialAmount: investment?.initialAmount?.toString() || '',
     currentBalance: investment?.currentBalance?.toString() || '',
@@ -33,14 +36,20 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
     description: investment?.description || '',
   });
 
-  const [errors, setErrors] = useState<Record<string, string>>({});
+  type FieldErrors = Record<string, string>;
+  type FormErrors = { fields: FieldErrors; submit?: string; global?: string[] };
+  const [errors, setErrors] = useState<FormErrors>({ fields: {} });
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const validateForm = () => {
-    const newErrors: Record<string, string> = {};
+    const newErrors: FieldErrors = {};
 
     if (!formData.name.trim()) {
       newErrors.name = 'Investment name is required';
+    }
+
+    if (!formData.currency) {
+      newErrors.currency = 'Currency is required';
     }
 
     if (!formData.category) {
@@ -82,7 +91,7 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
       }
     }
 
-    setErrors(newErrors);
+    setErrors({ fields: newErrors });
     return Object.keys(newErrors).length === 0;
   };
 
@@ -98,6 +107,7 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
     try {
       const submitData: CreateInvestmentData = {
         name: formData.name.trim(),
+        currency: formData.currency as any,
         category: formData.category as any,
         initialAmount: parseFloat(formData.initialAmount),
         startDate: formData.startDate,
@@ -126,7 +136,36 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
       onSuccess();
     } catch (error) {
       console.error('Failed to save investment:', error);
-      setErrors({ submit: 'Failed to save investment. Please try again.' });
+      const defaultMessage = 'Failed to save investment. Please fix the errors and try again.';
+      if (isAxiosError(error)) {
+        const data: any = error.response?.data;
+        const serverMessage: string | undefined = data?.message || data?.error;
+        const details: Array<{ field?: string; message?: string }> = Array.isArray(data?.details) ? data.details : [];
+
+        const fieldErrors: FieldErrors = {};
+        const globalMessages: string[] = [];
+
+        if (serverMessage) {
+          globalMessages.push(serverMessage);
+        }
+
+        for (const d of details) {
+          if (d?.field && d?.message) {
+            fieldErrors[d.field] = d.message;
+            globalMessages.push(d.message);
+          } else if (d?.message) {
+            globalMessages.push(d.message);
+          }
+        }
+
+        setErrors({
+          fields: fieldErrors,
+          submit: serverMessage || defaultMessage,
+          global: globalMessages.length ? globalMessages : undefined,
+        });
+      } else {
+        setErrors({ fields: {}, submit: defaultMessage });
+      }
     } finally {
       setIsSubmitting(false);
     }
@@ -134,16 +173,25 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    if (errors[field]) {
-      setErrors(prev => ({ ...prev, [field]: '' }));
+    if (errors.fields[field]) {
+      setErrors(prev => ({ ...prev, fields: { ...prev.fields, [field]: '' } }));
     }
   };
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
-      {errors.submit && (
+      {(errors.submit || (errors.global && errors.global.length)) && (
         <div className="bg-red-50 border border-red-200 rounded-md p-4">
-          <div className="text-sm text-red-600">{errors.submit}</div>
+          {errors.submit && (
+            <div className="text-sm text-red-600">{errors.submit}</div>
+          )}
+          {errors.global && errors.global.length > 0 && (
+            <ul className="list-disc pl-5 mt-2 text-sm text-red-600">
+              {errors.global.map((msg, idx) => (
+                <li key={idx}>{msg}</li>
+              ))}
+            </ul>
+          )}
         </div>
       )}
 
@@ -157,10 +205,26 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             value={formData.name}
             onChange={(e) => handleInputChange('name', e.target.value)}
             placeholder="Enter investment name"
-            className={errors.name ? 'border-red-300' : ''}
+            className={errors.fields.name ? 'border-red-300' : ''}
             required
           />
-          {errors.name && <p className="text-sm text-red-600 mt-1">{errors.name}</p>}
+          {errors.fields.name && <p className="text-sm text-red-600 mt-1">{errors.fields.name}</p>}
+        </div>
+
+
+        {/* Investment Currency */}
+        <div>
+          <Label htmlFor="currency">Currency *</Label>
+          <Select
+            id="currency"
+            options={CURRENCY_OPTIONS}
+            value={formData.currency}
+            onChange={(e) => handleInputChange('currency', e.target.value)}
+            placeholder="Select currency"
+            className={errors.fields.currency ? 'border-red-300' : ''}
+            required
+          />
+          {errors.fields.currency && <p className="text-sm text-red-600 mt-1">{errors.fields.currency}</p>}
         </div>
 
         {/* Investment Category */}
@@ -172,10 +236,10 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             value={formData.category}
             onChange={(e) => handleInputChange('category', e.target.value)}
             placeholder="Select investment Category"
-            className={errors.category ? 'border-red-300' : ''}
+            className={errors.fields.category ? 'border-red-300' : ''}
             required
           />
-          {errors.category && <p className="text-sm text-red-600 mt-1">{errors.category}</p>}
+          {errors.fields.category && <p className="text-sm text-red-600 mt-1">{errors.fields.category}</p>}
         </div>
 
         {/* Return Type */}
@@ -187,10 +251,10 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             value={formData.returnType}
             onChange={(e) => handleInputChange('returnType', e.target.value)}
             placeholder="Select return type"
-            className={errors.returnType ? 'border-red-300' : ''}
+            className={errors.fields.returnType ? 'border-red-300' : ''}
             required
           />
-          {errors.returnType && <p className="text-sm text-red-600 mt-1">{errors.returnType}</p>}
+          {errors.fields.returnType && <p className="text-sm text-red-600 mt-1">{errors.fields.returnType}</p>}
           <p className="text-xs text-gray-500 mt-1">
             {formData.returnType === 'FIXED' 
               ? 'Fixed return investments require a specific interest rate.'
@@ -214,7 +278,7 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
 
         {/* Initial Amount */}
         <div>
-          <Label htmlFor="initialAmount">Initial Amount ($) *</Label>
+          <Label htmlFor="initialAmount">Initial Amount *</Label>
           <Input
             id="initialAmount"
             type="number"
@@ -223,16 +287,16 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             value={formData.initialAmount}
             onChange={(e) => handleInputChange('initialAmount', e.target.value)}
             placeholder="0.00"
-            className={errors.initialAmount ? 'border-red-300' : ''}
+            className={errors.fields.initialAmount ? 'border-red-300' : ''}
             required
           />
-          {errors.initialAmount && <p className="text-sm text-red-600 mt-1">{errors.initialAmount}</p>}
+          {errors.fields.initialAmount && <p className="text-sm text-red-600 mt-1">{errors.fields.initialAmount}</p>}
         </div>
 
         {/* Current Balance (Edit mode only) */}
         {isEditMode && (
           <div>
-            <Label htmlFor="currentBalance">Current Balance ($) *</Label>
+            <Label htmlFor="currentBalance">Current Balance *</Label>
             <Input
               id="currentBalance"
               type="number"
@@ -241,10 +305,10 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
               value={formData.currentBalance}
               onChange={(e) => handleInputChange('currentBalance', e.target.value)}
               placeholder="0.00"
-              className={errors.currentBalance ? 'border-red-300' : ''}
+              className={errors.fields.currentBalance ? 'border-red-300' : ''}
               required
             />
-            {errors.currentBalance && <p className="text-sm text-red-600 mt-1">{errors.currentBalance}</p>}
+            {errors.fields.currentBalance && <p className="text-sm text-red-600 mt-1">{errors.fields.currentBalance}</p>}
           </div>
         )}
 
@@ -256,10 +320,10 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             type="date"
             value={formData.startDate}
             onChange={(e) => handleInputChange('startDate', e.target.value)}
-            className={errors.startDate ? 'border-red-300' : ''}
+            className={errors.fields.startDate ? 'border-red-300' : ''}
             required
           />
-          {errors.startDate && <p className="text-sm text-red-600 mt-1">{errors.startDate}</p>}
+          {errors.fields.startDate && <p className="text-sm text-red-600 mt-1">{errors.fields.startDate}</p>}
         </div>
 
         {/* Return Rate */}
@@ -279,10 +343,10 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
             value={formData.returnRate}
             onChange={(e) => handleInputChange('returnRate', e.target.value)}
             placeholder={formData.returnType === 'FIXED' ? 'Enter interest rate' : 'Optional - leave empty for variable returns'}
-            className={errors.returnRate ? 'border-red-300' : ''}
+            className={errors.fields.returnRate ? 'border-red-300' : ''}
             required={formData.returnType === 'FIXED'}
           />
-          {errors.returnRate && <p className="text-sm text-red-600 mt-1">{errors.returnRate}</p>}
+          {errors.fields.returnRate && <p className="text-sm text-red-600 mt-1">{errors.fields.returnRate}</p>}
           {formData.returnType === 'VARIABLE' && (
             <p className="text-xs text-gray-500 mt-1">
               Optional: Provide an estimated return rate for reference. Variable returns fluctuate based on market conditions.

@@ -132,6 +132,7 @@ export default function Returns() {
           id: 'inv-1',
           userId: 'user-1',
           name: 'Tech Growth Fund',
+          currency: 'USD',
           category: 'STOCKS',
           initialAmount: 10000,
           currentBalance: 12500,

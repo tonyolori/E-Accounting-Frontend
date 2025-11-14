@@ -2,6 +2,7 @@ export interface Investment {
   id: string;
   userId: string;
   name: string;
+  currency: CurrencyCode;
   category: InvestmentCategory;
   initialAmount: number;
   currentBalance: number;
@@ -21,6 +22,7 @@ export type InvestmentStatus = 'ACTIVE' | 'CLOSED' | 'PENDING';
 
 export interface CreateInvestmentData {
   name: string;
+  currency: CurrencyCode;
   category: InvestmentCategory;
   initialAmount: number;
   startDate: string;
@@ -38,6 +40,7 @@ export interface InvestmentFilters {
   search?: string;
   category?: InvestmentCategory;
   status?: InvestmentStatus;
+  currency?: CurrencyCode;
   sortBy?: 'name' | 'initialAmount' | 'currentBalance' | 'returnRate' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
   page?: number;
@@ -75,4 +78,11 @@ export const INVESTMENT_STATUS_OPTIONS = [
   { value: 'ACTIVE', label: 'Active' },
   { value: 'CLOSED', label: 'Closed' },
   { value: 'PENDING', label: 'Pending' },
+];
+
+export type CurrencyCode = 'USD' | 'NGN';
+
+export const CURRENCY_OPTIONS = [
+  { value: 'NGN', label: 'Naira (NGN)' },
+  { value: 'USD', label: 'US Dollar (USD)' },
 ];
