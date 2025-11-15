@@ -20,8 +20,8 @@ const navigation = [
   { name: 'Dashboard', href: '/dashboard', icon: Home },
   { name: 'Investments', href: '/dashboard/investments', icon: TrendingUp },
   { name: 'Transactions', href: '/dashboard/transactions', icon: CreditCard },
-  { name: 'Returns', href: '/dashboard/returns', icon: DollarSign },
-  { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
+  // { name: 'Returns', href: '/dashboard/returns', icon: DollarSign },
+  // { name: 'Reports', href: '/dashboard/reports', icon: BarChart3 },
 ];
 
 export default function Sidebar({ sidebarOpen, setSidebarOpen }: SidebarProps) {

@@ -31,7 +31,7 @@ function App() {
               <Route path="investments" element={<Investments />} />
               <Route path="transactions" element={<Transactions />} />
               <Route path="returns" element={<Returns />} />
-              <Route path="reports" element={<Reports />} />
+              {/* <Route path="reports" element={<Reports />} /> */}
             </Route>
             
             {/* Default redirect */}
