@@ -43,6 +43,10 @@ export default function TransactionDetail({ transaction, onEdit, onDelete }: Tra
     switch (type) {
       case 'DEPOSIT':
         return 'text-green-600 bg-green-100 border-green-200';
+      case 'RETURN':
+        return 'text-green-600 bg-green-100 border-green-200';
+      case 'DIVIDEND':
+        return 'text-green-600 bg-green-100 border-green-200';
       case 'WITHDRAWAL':
         return 'text-red-600 bg-red-100 border-red-200';
       case 'TRANSFER':
@@ -56,6 +60,10 @@ export default function TransactionDetail({ transaction, onEdit, onDelete }: Tra
     switch (type) {
       case 'DEPOSIT':
         return 'Deposit';
+      case 'RETURN':
+        return 'Return';
+      case 'DIVIDEND':
+        return 'Dividend';
       case 'WITHDRAWAL':
         return 'Withdrawal';
       case 'TRANSFER':
@@ -68,6 +76,10 @@ export default function TransactionDetail({ transaction, onEdit, onDelete }: Tra
   const getAmountDisplay = (type: Transaction['type'], amount: number) => {
     switch (type) {
       case 'DEPOSIT':
+        return `+${formatCurrency(amount)}`;
+      case 'RETURN':
+        return `+${formatCurrency(amount)}`;
+      case 'DIVIDEND':
         return `+${formatCurrency(amount)}`;
       case 'WITHDRAWAL':
         return `-${formatCurrency(amount)}`;
@@ -128,7 +140,7 @@ export default function TransactionDetail({ transaction, onEdit, onDelete }: Tra
               <Calendar className="h-5 w-5 text-gray-400 mr-3" />
               <div>
                 <dt className="text-sm font-medium text-gray-500">Transaction Date</dt>
-                <dd className="text-sm text-gray-900">{formatDate(transaction.date)}</dd>
+                <dd className="text-sm text-gray-900">{formatDate(transaction.transactionDate)}</dd>
               </div>
             </div>
             <div className="flex items-center">

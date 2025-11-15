@@ -7,7 +7,7 @@ export interface Transaction {
   type: TransactionType;
   amount: number;
   description: string;
-  date: string;
+  transactionDate: string;
   balance: number;
   createdAt: string;
   updatedAt: string;
@@ -20,14 +20,14 @@ export interface Transaction {
   };
 }
 
-export type TransactionType = 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER';
+export type TransactionType = 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER' | 'RETURN' | 'DIVIDEND';
 
 export interface CreateTransactionData {
   investmentId: string;
   type: TransactionType;
   amount: number;
   description: string;
-  date: string;
+  transactionDate: string;
 }
 
 export interface UpdateTransactionData extends Partial<CreateTransactionData> {
@@ -42,7 +42,7 @@ export interface TransactionFilters {
   endDate?: string;
   minAmount?: number;
   maxAmount?: number;
-  sortBy?: 'date' | 'amount' | 'type' | 'createdAt';
+  sortBy?: 'transactionDate' | 'amount' | 'type' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
@@ -77,10 +77,12 @@ export const TRANSACTION_TYPE_OPTIONS: { value: string; label: string }[] = [
   { value: 'DEPOSIT', label: 'Deposit' },
   { value: 'WITHDRAWAL', label: 'Withdrawal' },
   { value: 'TRANSFER', label: 'Transfer' },
+  { value: 'RETURN', label: 'Return' },
+  { value: 'DIVIDEND', label: 'Dividend' },
 ];
 
 export const TRANSACTION_SORT_OPTIONS: { value: string; label: string }[] = [
-  { value: 'date', label: 'Transaction Date' },
+  { value: 'transactionDate', label: 'Transaction Date' },
   { value: 'amount', label: 'Amount' },
   { value: 'type', label: 'Type' },
   { value: 'createdAt', label: 'Created Date' },

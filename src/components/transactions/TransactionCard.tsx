@@ -40,6 +40,10 @@ export default function TransactionCard({ transaction, onView, onEdit, onDelete 
     switch (type) {
       case 'DEPOSIT':
         return <ArrowDownRight className="h-5 w-5 text-green-600" />;
+      case 'RETURN':
+        return <ArrowDownRight className="h-5 w-5 text-green-600" />;
+      case 'DIVIDEND':
+        return <ArrowDownRight className="h-5 w-5 text-green-600" />;
       case 'WITHDRAWAL':
         return <ArrowUpRight className="h-5 w-5 text-red-600" />;
       case 'TRANSFER':
@@ -52,6 +56,10 @@ export default function TransactionCard({ transaction, onView, onEdit, onDelete 
   const getTransactionColor = (type: Transaction['type']) => {
     switch (type) {
       case 'DEPOSIT':
+        return 'text-green-600';
+      case 'RETURN':
+        return 'text-green-600';
+      case 'DIVIDEND':
         return 'text-green-600';
       case 'WITHDRAWAL':
         return 'text-red-600';
@@ -66,6 +74,10 @@ export default function TransactionCard({ transaction, onView, onEdit, onDelete 
     switch (type) {
       case 'DEPOSIT':
         return 'Deposit';
+      case 'RETURN':
+        return 'Return';
+      case 'DIVIDEND':
+        return 'Dividend';
       case 'WITHDRAWAL':
         return 'Withdrawal';
       case 'TRANSFER':
@@ -78,6 +90,10 @@ export default function TransactionCard({ transaction, onView, onEdit, onDelete 
   const getAmountDisplay = (type: Transaction['type'], amount: number) => {
     switch (type) {
       case 'DEPOSIT':
+        return `+${formatCurrency(amount)}`;
+      case 'RETURN':
+        return `+${formatCurrency(amount)}`;
+      case 'DIVIDEND':
         return `+${formatCurrency(amount)}`;
       case 'WITHDRAWAL':
         return `-${formatCurrency(amount)}`;
@@ -122,7 +138,7 @@ export default function TransactionCard({ transaction, onView, onEdit, onDelete 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-sm text-gray-500">
                 <div className="flex items-center">
                   <Calendar className="h-4 w-4 mr-2" />
-                  <span>{formatDate(transaction.date)} at {formatTime(transaction.createdAt)}</span>
+                  <span>{formatDate(transaction.transactionDate)}</span>
                 </div>
                 
                 {transaction.investment && (
@@ -182,7 +198,7 @@ export default function TransactionCard({ transaction, onView, onEdit, onDelete 
       <div className="px-6 py-3 bg-gray-50 border-t border-gray-200">
         <div className="flex items-center justify-between text-xs text-gray-500">
           <span>Transaction ID: {transaction.id}</span>
-          <span>Updated {formatDate(transaction.updatedAt)}</span>
+          <span>Created {formatDate(transaction.createdAt)}</span>
         </div>
       </div>
     </div>

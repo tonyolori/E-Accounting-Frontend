@@ -36,7 +36,7 @@ export default function Transactions() {
   const [filters, setFilters] = useState<TransactionFilters>({
     page: 1,
     limit: 20,
-    sortBy: 'date',
+    sortBy: 'transactionDate',
     sortOrder: 'desc',
   });
 
@@ -79,7 +79,7 @@ export default function Transactions() {
           type: 'DEPOSIT',
           amount: 1000,
           description: 'Initial investment deposit',
-          date: '2024-01-15',
+          transactionDate: '2024-01-15',
           balance: 11000,
           createdAt: '2024-01-15T10:00:00.000Z',
           updatedAt: '2024-01-15T10:00:00.000Z',
@@ -96,7 +96,7 @@ export default function Transactions() {
           type: 'WITHDRAWAL',
           amount: 500,
           description: 'Partial withdrawal for expenses',
-          date: '2024-01-14',
+          transactionDate: '2024-01-14',
           balance: 9500,
           createdAt: '2024-01-14T15:30:00.000Z',
           updatedAt: '2024-01-14T15:30:00.000Z',
@@ -113,7 +113,7 @@ export default function Transactions() {
           type: 'TRANSFER',
           amount: 250,
           description: 'Portfolio rebalancing transfer',
-          date: '2024-01-13',
+          transactionDate: '2024-01-13',
           balance: 10750,
           createdAt: '2024-01-13T09:15:00.000Z',
           updatedAt: '2024-01-13T09:15:00.000Z',

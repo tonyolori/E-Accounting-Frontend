@@ -5,10 +5,10 @@ import { apiService } from '../../services/api';
 interface Transaction {
   id: string;
   investmentId: string;
-  type: 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER';
+  type: 'DEPOSIT' | 'WITHDRAWAL' | 'TRANSFER' | 'RETURN' | 'DIVIDEND';
   amount: number;
   description: string;
-  date: string;
+  transactionDate: string;
   balance: number;
   createdAt: string;
   investment?: {
@@ -53,7 +53,7 @@ export default function RecentTransactions() {
             type: 'DEPOSIT',
             amount: 1000,
             description: 'Initial investment',
-            date: '2024-01-15',
+            transactionDate: '2024-01-15',
             balance: 11000,
             createdAt: '2024-01-15T10:00:00.000Z'
           },
@@ -63,7 +63,7 @@ export default function RecentTransactions() {
             type: 'WITHDRAWAL',
             amount: 500,
             description: 'Partial withdrawal',
-            date: '2024-01-14',
+            transactionDate: '2024-01-14',
             balance: 9500,
             createdAt: '2024-01-14T15:30:00.000Z'
           },
@@ -73,7 +73,7 @@ export default function RecentTransactions() {
             type: 'TRANSFER',
             amount: 250,
             description: 'Portfolio rebalancing',
-            date: '2024-01-13',
+            transactionDate: '2024-01-13',
             balance: 10750,
             createdAt: '2024-01-13T09:15:00.000Z'
           },
@@ -106,6 +106,10 @@ export default function RecentTransactions() {
     switch (type) {
       case 'DEPOSIT':
         return <ArrowDownRight className="h-4 w-4 text-green-600" />;
+      case 'RETURN':
+        return <ArrowDownRight className="h-4 w-4 text-green-600" />;
+      case 'DIVIDEND':
+        return <ArrowDownRight className="h-4 w-4 text-green-600" />;
       case 'WITHDRAWAL':
         return <ArrowUpRight className="h-4 w-4 text-red-600" />;
       case 'TRANSFER':
@@ -118,6 +122,10 @@ export default function RecentTransactions() {
   const getTransactionColor = (type: Transaction['type']) => {
     switch (type) {
       case 'DEPOSIT':
+        return 'text-green-600';
+      case 'RETURN':
+        return 'text-green-600';
+      case 'DIVIDEND':
         return 'text-green-600';
       case 'WITHDRAWAL':
         return 'text-red-600';
@@ -168,7 +176,7 @@ export default function RecentTransactions() {
               <div className="flex items-center space-x-2 text-xs text-gray-500">
                 <span>{transaction.type.toLowerCase()}</span>
                 <span>•</span>
-                <span>{formatDate(transaction.date)}</span>
+                <span>{formatDate(transaction.transactionDate)}</span>
               </div>
             </div>
           </div>

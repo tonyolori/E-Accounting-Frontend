@@ -114,7 +114,7 @@ export default function DeleteConfirmModal({ isOpen, onClose, transaction, onSuc
                 </div>
                 <div className="flex justify-between">
                   <span className="text-sm font-medium text-gray-700">Date:</span>
-                  <span className="text-sm text-gray-900">{formatDate(transaction.date)}</span>
+                  <span className="text-sm text-gray-900">{formatDate(transaction.transactionDate)}</span>
                 </div>
                 {transaction.investment && (
                   <div className="flex justify-between">

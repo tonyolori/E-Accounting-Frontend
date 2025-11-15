@@ -26,7 +26,7 @@ export default function TransactionForm({ transaction, investments, onSuccess, o
     type: transaction?.type || 'DEPOSIT',
     amount: transaction?.amount?.toString() || '',
     description: transaction?.description || '',
-    date: transaction?.date ? transaction.date.split('T')[0] : new Date().toISOString().split('T')[0],
+    date: transaction?.transactionDate ? transaction.transactionDate.split('T')[0] : new Date().toISOString().split('T')[0],
   });
 
   const [errors, setErrors] = useState<Record<string, string>>({});
@@ -81,7 +81,7 @@ export default function TransactionForm({ transaction, investments, onSuccess, o
         type: formData.type as any,
         amount: parseFloat(formData.amount),
         description: formData.description.trim(),
-        date: formData.date,
+        transactionDate: formData.date,
       };
 
       if (isEditMode && transaction) {
