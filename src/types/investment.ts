@@ -80,9 +80,10 @@ export const INVESTMENT_STATUS_OPTIONS = [
   { value: 'PENDING', label: 'Pending' },
 ];
 
-export type CurrencyCode = 'USD' | 'NGN';
+export type CurrencyCode = 'USD' | 'NGN' | 'GBP';
 
 export const CURRENCY_OPTIONS = [
   { value: 'NGN', label: 'Naira (NGN)' },
   { value: 'USD', label: 'US Dollar (USD)' },
+  { value: 'GBP', label: 'British Pound (GBP)' },
 ];
