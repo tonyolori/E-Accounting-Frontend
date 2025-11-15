@@ -11,6 +11,11 @@ interface Transaction {
   date: string;
   balance: number;
   createdAt: string;
+  investment?: {
+    id: string;
+    name?: string;
+    currency?: string;
+  };
 }
 
 export default function RecentTransactions() {
@@ -81,10 +86,10 @@ export default function RecentTransactions() {
     fetchRecentTransactions();
   }, []);
 
-  const formatCurrency = (amount: number) => {
+  const formatCurrency = (amount: number, currencyCode?: string) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currencyCode || 'NGN',
     }).format(amount);
   };
 
@@ -170,10 +175,10 @@ export default function RecentTransactions() {
           <div className="text-right">
             <p className={`text-sm font-medium ${getTransactionColor(transaction.type)}`}>
               {transaction.type === 'WITHDRAWAL' ? '-' : '+'}
-              {formatCurrency(transaction.amount)}
+              {formatCurrency(transaction.amount, transaction.investment?.currency)}
             </p>
             <p className="text-xs text-gray-500">
-              Balance: {formatCurrency(transaction.balance)}
+              Balance: {formatCurrency(transaction.balance, transaction.investment?.currency)}
             </p>
           </div>
         </div>

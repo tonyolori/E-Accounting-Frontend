@@ -10,10 +10,11 @@ interface TransactionDetailProps {
 }
 
 export default function TransactionDetail({ transaction, onEdit, onDelete }: TransactionDetailProps) {
+  const currencyCode = (transaction.investment?.currency as string) || 'NGN';
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: currencyCode,
     }).format(amount);
   };
 

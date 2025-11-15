@@ -107,6 +107,9 @@ export default function TransactionForm({ transaction, investments, onSuccess, o
   };
 
   const selectedInvestment = investments.find(inv => inv.id === formData.investmentId);
+  const currencyCode = (selectedInvestment?.currency as string) || 'NGN';
+  const formatCurrency = (amount: number) =>
+    new Intl.NumberFormat('en-US', { style: 'currency', currency: currencyCode }).format(amount);
 
   return (
     <form onSubmit={handleSubmit} className="space-y-6">
@@ -134,10 +137,7 @@ export default function TransactionForm({ transaction, investments, onSuccess, o
           {errors.investmentId && <p className="text-sm text-red-600 mt-1">{errors.investmentId}</p>}
           {selectedInvestment && (
             <p className="text-sm text-gray-500 mt-2">
-              Current balance: {new Intl.NumberFormat('en-US', {
-                style: 'currency',
-                currency: 'USD',
-              }).format(selectedInvestment.currentBalance)}
+              Current balance: {formatCurrency(selectedInvestment.currentBalance)}
             </p>
           )}
         </div>
@@ -158,7 +158,7 @@ export default function TransactionForm({ transaction, investments, onSuccess, o
 
         {/* Amount */}
         <div>
-          <Label htmlFor="amount">Amount ($) *</Label>
+          <Label htmlFor="amount">Amount ({currencyCode}) *</Label>
           <Input
             id="amount"
             type="number"

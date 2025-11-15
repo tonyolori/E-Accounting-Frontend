@@ -1,3 +1,5 @@
+import type { CurrencyCode } from './investment';
+
 export interface Transaction {
   id: string;
   investmentId: string;
@@ -14,6 +16,7 @@ export interface Transaction {
     id: string;
     name: string;
     type: string;
+    currency?: CurrencyCode | string;
   };
 }
 
