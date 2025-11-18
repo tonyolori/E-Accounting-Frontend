@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import { Menu, Bell, Search, User, LogOut, Settings, ChevronDown } from 'lucide-react';
+import { Menu, Bell, Search, User, LogOut, Settings, ChevronDown, Info } from 'lucide-react';
 import { useAuth } from '../../contexts/AuthContext';
 import { apiService } from '../../services/api';
 import { Button } from '../ui/button';
@@ -8,12 +8,31 @@ interface HeaderProps {
   setSidebarOpen: (open: boolean) => void;
 }
 
+interface QuickStatsApiResponse {
+  success: boolean;
+  data: {
+    totalInvestments: number;
+    totalPortfolioValue: number | string;
+    totalReturns: number;
+    returnPercentage: number;
+    thisMonth?: {
+      transactionCount: number;
+      transactionAmount: number | string;
+    };
+    currency?: string;
+    ratesAt?: string;
+  };
+}
+
 interface QuickStats {
   totalValue: number;
-  dailyChange: number;
-  dailyChangePercent: number;
   totalReturns: number;
-  activeInvestments: number;
+  returnPercentage: number;
+  totalInvestments: number;
+  thisMonthCount: number;
+  thisMonthAmount: number;
+  currency: string;
+  ratesAt?: string;
 }
 
 export default function Header({ setSidebarOpen }: HeaderProps) {
@@ -24,9 +43,19 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
   useEffect(() => {
     const fetchQuickStats = async () => {
       try {
-        const response = await apiService.get<{success: boolean; data: QuickStats}>('/api/reports/quick-stats');
-        if (response.data.success) {
-          setQuickStats(response.data.data);
+        const response = await apiService.get<QuickStatsApiResponse>('/api/reports/quick-stats');
+        if (response.data.success && response.data.data) {
+          const d = response.data.data;
+          setQuickStats({
+            totalValue: Number(d.totalPortfolioValue ?? 0),
+            totalReturns: Number(d.totalReturns ?? 0),
+            returnPercentage: Number(d.returnPercentage ?? 0),
+            totalInvestments: Number(d.totalInvestments ?? 0),
+            thisMonthCount: Number(d.thisMonth?.transactionCount ?? 0),
+            thisMonthAmount: Number(d.thisMonth?.transactionAmount ?? 0),
+            currency: String(d.currency || 'USD'),
+            ratesAt: d.ratesAt,
+          });
         }
       } catch (error) {
         console.error('Failed to fetch quick stats:', error);
@@ -44,7 +73,7 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
   const formatCurrency = (amount: number) => {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
-      currency: 'USD',
+      currency: quickStats?.currency || 'USD',
     }).format(amount);
   };
 
@@ -74,23 +103,40 @@ export default function Header({ setSidebarOpen }: HeaderProps) {
             <>
               <div className="hidden lg:flex items-center space-x-6">
                 <div className="text-sm">
-                  <div className="text-gray-500">Total Value</div>
+                  <div className="text-gray-500 flex items-center space-x-1">
+                    <span>Total Value</span>
+                    {quickStats.ratesAt && (
+                      <span
+                        title={`Rates at: ${new Date(quickStats.ratesAt).toLocaleString('en-US', {
+                          year: 'numeric', month: 'short', day: 'numeric', hour: '2-digit', minute: '2-digit'
+                        })}`}
+                      >
+                        <Info className="h-3.5 w-3.5 text-gray-400 cursor-help" />
+                      </span>
+                    )}
+                  </div>
                   <div className="font-semibold text-gray-900">
                     {formatCurrency(quickStats.totalValue)}
                   </div>
                 </div>
                 <div className="text-sm">
-                  <div className="text-gray-500">Daily Change</div>
+                  <div className="text-gray-500">Returns</div>
                   <div className={`font-semibold ${
-                    quickStats.dailyChange >= 0 ? 'text-green-600' : 'text-red-600'
+                    (quickStats.totalReturns ?? 0) >= 0 ? 'text-green-600' : 'text-red-600'
                   }`}>
-                    {formatCurrency(quickStats.dailyChange)} ({formatPercent(quickStats.dailyChangePercent)})
+                    {formatCurrency(quickStats.totalReturns)} ({formatPercent(quickStats.returnPercentage)})
                   </div>
                 </div>
                 <div className="text-sm">
-                  <div className="text-gray-500">Active Investments</div>
+                  <div className="text-gray-500">Investments</div>
                   <div className="font-semibold text-gray-900">
-                    {quickStats.activeInvestments}
+                    {quickStats.totalInvestments}
+                  </div>
+                </div>
+                <div className="text-sm">
+                  <div className="text-gray-500">This Month</div>
+                  <div className="font-semibold text-gray-900">
+                    {quickStats.thisMonthCount} tx · {formatCurrency(quickStats.thisMonthAmount)}
                   </div>
                 </div>
               </div>
