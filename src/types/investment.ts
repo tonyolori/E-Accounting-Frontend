@@ -7,7 +7,7 @@ export interface Investment {
   initialAmount: number;
   currentBalance: number;
   startDate: string;
-  returnRate?: number | null;
+  interestRate?: number | null;
   returnType: InvestmentReturnType;
   status: InvestmentStatus;
   description?: string;
@@ -26,7 +26,7 @@ export interface CreateInvestmentData {
   category: InvestmentCategory;
   initialAmount: number;
   startDate: string;
-  returnRate?: number | null;
+  interestRate?: number | null;
   returnType: InvestmentReturnType;
   description?: string;
 }
@@ -41,7 +41,7 @@ export interface InvestmentFilters {
   category?: InvestmentCategory;
   status?: InvestmentStatus;
   currency?: CurrencyCode;
-  sortBy?: 'name' | 'initialAmount' | 'currentBalance' | 'returnRate' | 'createdAt';
+  sortBy?: 'name' | 'initialAmount' | 'currentBalance' | 'interestRate' | 'createdAt';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;

@@ -53,7 +53,7 @@ export interface ReportData {
     totalValue: number;
     totalReturns: number;
     totalTransactions: number;
-    avgReturnRate: number;
+    avgInterestRate: number;
   };
   investments: {
     id: string;
@@ -61,7 +61,7 @@ export interface ReportData {
     type: string;
     value: number;
     return: number;
-    returnRate: number;
+    interestRate: number;
   }[];
   transactions: {
     id: string;

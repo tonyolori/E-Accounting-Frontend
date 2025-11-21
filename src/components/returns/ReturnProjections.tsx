@@ -18,8 +18,8 @@ export default function ReturnProjections({ investments }: ReturnProjectionsProp
     return `${percent.toFixed(1)}%`;
   };
 
-  const calculateProjection = (investment: Investment, years: number, returnRate: number) => {
-    return investment.currentBalance * Math.pow(1 + returnRate / 100, years);
+  const calculateProjection = (investment: Investment, years: number, interestRate: number) => {
+    return investment.currentBalance * Math.pow(1 + interestRate / 100, years);
   };
 
   const projectionScenarios = [

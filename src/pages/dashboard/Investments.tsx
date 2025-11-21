@@ -1,5 +1,5 @@
 import React, { useState, useEffect, useCallback } from 'react';
-import { Plus, Search, Edit, Trash2, Eye, SortAsc, SortDesc, DollarSign } from 'lucide-react';
+import { Plus, Search, Edit, Trash2, Eye, SortAsc, SortDesc } from 'lucide-react';
 import { Button } from '../../components/ui/button';
 import { Input } from '../../components/ui/input';
 import { Select } from '../../components/ui/select';
@@ -15,6 +15,7 @@ import { investmentService } from '../../services/investmentService';
 import InvestmentForm from '../../components/investments/InvestmentForm';
 import InvestmentDetail from '../../components/investments/InvestmentDetail';
 import DeleteConfirmModal from '../../components/investments/DeleteConfirmModal';
+import InterestActions from '../../components/investments/InterestActions';
 
 export default function Investments() {
   const [investments, setInvestments] = useState<Investment[]>([]);
@@ -40,12 +41,6 @@ export default function Investments() {
   const [isDetailModalOpen, setIsDetailModalOpen] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [selectedInvestment, setSelectedInvestment] = useState<Investment | null>(null);
-  const [isUpdateBalanceOpen, setIsUpdateBalanceOpen] = useState(false);
-  const [investmentToUpdate, setInvestmentToUpdate] = useState<Investment | null>(null);
-  const [balanceValue, setBalanceValue] = useState<string>('');
-  const [balanceReason, setBalanceReason] = useState<string>('');
-  const [balanceIsSubmitting, setBalanceIsSubmitting] = useState(false);
-  const [balanceError, setBalanceError] = useState<string | null>(null);
 
   // Fetch investments
   const fetchInvestments = useCallback(async () => {
@@ -69,7 +64,7 @@ export default function Investments() {
           initialAmount: 10000,
           currentBalance: 12500,
           startDate: '2024-01-01',
-          returnRate: 15.2,
+          interestRate: 15.2,
           returnType: 'VARIABLE',
           status: 'ACTIVE',
           description: 'Technology sector growth investment',
@@ -85,7 +80,7 @@ export default function Investments() {
           initialAmount: 5000,
           currentBalance: 5200,
           startDate: '2024-01-02',
-          returnRate: 4.2,
+          interestRate: 4.2,
           returnType: 'FIXED',
           status: 'ACTIVE',
           description: 'Safe government bond investment',
@@ -101,7 +96,7 @@ export default function Investments() {
           initialAmount: 15000,
           currentBalance: 16800,
           startDate: '2024-01-03',
-          returnRate: 8.5,
+          interestRate: 8.5,
           returnType: 'VARIABLE',
           status: 'ACTIVE',
           description: 'Real estate investment trust',
@@ -175,39 +170,6 @@ export default function Investments() {
   const handleDelete = (investment: Investment) => {
     setSelectedInvestment(investment);
     setIsDeleteModalOpen(true);
-  };
-
-  const openUpdateBalance = (investment: Investment) => {
-    setInvestmentToUpdate(investment);
-    setBalanceValue(String(investment.currentBalance ?? ''));
-    setBalanceReason('');
-    setBalanceError(null);
-    setIsUpdateBalanceOpen(true);
-  };
-
-  const handleSubmitUpdateBalance = async () => {
-    if (!investmentToUpdate) return;
-    const parsed = parseFloat(balanceValue);
-    if (Number.isNaN(parsed) || parsed < 0) {
-      setBalanceError('Please enter a valid amount greater than or equal to 0');
-      return;
-    }
-    try {
-      setBalanceIsSubmitting(true);
-      setBalanceError(null);
-      await investmentService.updateInvestmentBalanceManual(
-        investmentToUpdate.id,
-        parsed,
-        balanceReason || undefined
-      );
-      setIsUpdateBalanceOpen(false);
-      setInvestmentToUpdate(null);
-      await fetchInvestments();
-    } catch (e) {
-      setBalanceError('Failed to update balance. Please try again.');
-    } finally {
-      setBalanceIsSubmitting(false);
-    }
   };
 
   return (
@@ -285,7 +247,7 @@ export default function Investments() {
                   { value: 'name', label: 'Name' },
                   { value: 'initialAmount', label: 'Initial Amount' },
                   { value: 'currentBalance', label: 'Current Balance' },
-                  { value: 'returnRate', label: 'Return Rate' },
+                  { value: 'interestRate', label: 'Interest Rate' },
                   { value: 'createdAt', label: 'Date Created' },
                 ]}
                 value={filters.sortBy || 'createdAt'}
@@ -379,10 +341,10 @@ export default function Investments() {
                         )}
                       </div>
                     </th>
-                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSortChange('returnRate')}>
+                    <th scope="col" className="px-6 py-3 text-right text-xs font-medium text-gray-500 uppercase tracking-wider cursor-pointer" onClick={() => handleSortChange('interestRate')}>
                       <div className="flex items-center justify-end space-x-1">
-                        <span>Return Rate</span>
-                        {filters.sortBy === 'returnRate' && (
+                        <span>Interest Rate</span>
+                        {filters.sortBy === 'interestRate' && (
                           filters.sortOrder === 'asc' ? <SortAsc className="h-3 w-3" /> : <SortDesc className="h-3 w-3" />
                         )}
                       </div>
@@ -434,7 +396,7 @@ export default function Investments() {
                           {formatAmount(investment.currentBalance, investment.currency)}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-900 text-right">
-                          {investment.returnRate != null ? `${investment.returnRate.toFixed(2)}%` : '—'}
+                          {investment.interestRate != null ? `${investment.interestRate.toFixed(2)}%` : '—'}
                         </td>
                         <td className="px-6 py-4 whitespace-nowrap text-sm text-gray-500">
                           {formatDate(investment.startDate)}
@@ -449,17 +411,7 @@ export default function Investments() {
                             >
                               <Eye className="h-4 w-4" />
                             </Button>
-                            {investment.returnType === 'VARIABLE' && (
-                              <Button
-                                variant="ghost"
-                                size="sm"
-                                onClick={() => openUpdateBalance(investment)}
-                                className="h-8 w-8 p-0"
-                                title="Update Balance"
-                              >
-                                <DollarSign className="h-4 w-4" />
-                              </Button>
-                            )}
+                            <InterestActions investment={investment} onSuccess={fetchInvestments} />
                             <Button
                               variant="ghost"
                               size="sm"
@@ -599,60 +551,6 @@ export default function Investments() {
         investment={selectedInvestment}
         onSuccess={handleDeleteSuccess}
       />
-
-      <Modal
-        isOpen={isUpdateBalanceOpen}
-        onClose={() => setIsUpdateBalanceOpen(false)}
-        title="Update Balance"
-        className="max-w-md"
-      >
-        <div className="space-y-4">
-          {investmentToUpdate && (
-            <div className="text-sm text-gray-600">
-              <div className="font-medium text-gray-900 mb-1">{investmentToUpdate.name}</div>
-              <div>Current balance: {new Intl.NumberFormat(undefined, { style: 'currency', currency: investmentToUpdate.currency }).format(investmentToUpdate.currentBalance)}</div>
-            </div>
-          )}
-
-          {balanceError && (
-            <div className="text-sm text-red-600">{balanceError}</div>
-          )}
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">New Balance</label>
-            <Input
-              type="number"
-              inputMode="decimal"
-              step="0.01"
-              min="0"
-              placeholder="Enter new balance"
-              value={balanceValue}
-              onChange={(e) => setBalanceValue(e.target.value)}
-              disabled={balanceIsSubmitting}
-            />
-          </div>
-
-          <div>
-            <label className="block text-sm font-medium text-gray-700 mb-1">Reason (optional)</label>
-            <Input
-              type="text"
-              placeholder="e.g. Market adjustment or manual correction"
-              value={balanceReason}
-              onChange={(e) => setBalanceReason(e.target.value)}
-              disabled={balanceIsSubmitting}
-            />
-          </div>
-
-          <div className="flex justify-end space-x-2 pt-2">
-            <Button variant="outline" onClick={() => setIsUpdateBalanceOpen(false)} disabled={balanceIsSubmitting}>
-              Cancel
-            </Button>
-            <Button onClick={handleSubmitUpdateBalance} disabled={balanceIsSubmitting}>
-              {balanceIsSubmitting ? 'Updating...' : 'Update Balance'}
-            </Button>
-          </div>
-        </div>
-      </Modal>
     </div>
   );
 }

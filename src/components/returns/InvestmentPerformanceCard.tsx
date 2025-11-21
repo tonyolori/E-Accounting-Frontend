@@ -18,7 +18,7 @@ export default function InvestmentPerformanceCard({ performance }: InvestmentPer
     return `${percent >= 0 ? '+' : ''}${percent.toFixed(2)}%`;
   };
 
-  const isPositive = performance.totalReturnRate >= 0;
+  const isPositive = performance.totalInterestRate >= 0;
 
   return (
     <div className="bg-white rounded-lg shadow-md overflow-hidden">
@@ -54,12 +54,12 @@ export default function InvestmentPerformanceCard({ performance }: InvestmentPer
           </div>
         </div>
 
-        {/* Return Rate */}
+        {/* Interest Rate */}
         <div className="mb-4">
           <div className="flex items-center justify-between">
-            <span className="text-sm text-gray-500">Return Rate</span>
+            <span className="text-sm text-gray-500">Interest Rate</span>
             <span className={`text-xl font-bold ${isPositive ? 'text-green-600' : 'text-red-600'}`}>
-              {formatPercent(performance.totalReturnRate)}
+              {formatPercent(performance.totalInterestRate)}
             </span>
           </div>
         </div>

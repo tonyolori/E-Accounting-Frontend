@@ -186,10 +186,10 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
             </div>
             <div className="ml-4">
               <dt className="text-sm font-medium text-gray-500">
-                {investment.returnType === 'FIXED' ? 'Interest Rate' : 'Return Rate'}
+                {investment.returnType === 'FIXED' ? 'Interest Rate' : 'Interest Rate'}
               </dt>
               <dd className="text-2xl font-bold text-gray-900">
-                {investment.returnRate?.toFixed(2) || 'Variable'}%
+                {investment.interestRate?.toFixed(2) || 'Variable'}%
               </dd>
               <dd className="text-sm text-gray-500">
                 {investment.returnType === 'FIXED' ? 'Fixed return' : 'Variable return'}
@@ -249,7 +249,7 @@ export default function InvestmentDetail({ investment, onEdit, onDelete }: Inves
             <div className="flex justify-between items-center py-2 border-b border-gray-100">
               <span className="text-sm text-gray-500">Expected Return</span>
               <span className="text-sm font-medium text-gray-900">
-                {investment.returnRate?.toFixed(2) || 'Variable'}%
+                {investment.interestRate?.toFixed(2) || 'Variable'}%
               </span>
             </div>
             <div className="flex justify-between items-center py-2">

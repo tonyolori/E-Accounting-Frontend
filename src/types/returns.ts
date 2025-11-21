@@ -3,7 +3,7 @@ export interface InvestmentReturn {
   investmentId: string;
   userId: string;
   returnAmount: number;
-  returnRate: number;
+  interestRate: number;
   period: ReturnPeriod;
   startDate: string;
   endDate: string;
@@ -24,7 +24,7 @@ export type ReturnPeriod = 'DAILY' | 'WEEKLY' | 'MONTHLY' | 'QUARTERLY' | 'YEARL
 
 export interface PerformanceMetrics {
   totalReturn: number;
-  totalReturnRate: number;
+  totalInterestRate: number;
   annualizedReturn: number;
   volatility: number;
   sharpeRatio: number;
@@ -46,7 +46,7 @@ export interface InvestmentPerformance {
   initialAmount: number;
   currentValue: number;
   totalReturn: number;
-  totalReturnRate: number;
+  totalInterestRate: number;
   dailyReturn: number;
   weeklyReturn: number;
   monthlyReturn: number;
@@ -72,7 +72,7 @@ export interface ReturnFilters {
   endDate?: string;
   minReturn?: number;
   maxReturn?: number;
-  sortBy?: 'returnRate' | 'returnAmount' | 'period' | 'calculatedAt' | 'totalReturnRate';
+  sortBy?: 'interestRate' | 'returnAmount' | 'period' | 'calculatedAt' | 'totalInterestRate';
   sortOrder?: 'asc' | 'desc';
   page?: number;
   limit?: number;
@@ -102,16 +102,16 @@ export interface PerformanceAnalytics {
   totalInvestments: number;
   totalValue: number;
   totalReturns: number;
-  averageReturnRate: number;
+  averageInterestRate: number;
   bestPerformer: {
     investmentId: string;
     name: string;
-    returnRate: number;
+    interestRate: number;
   };
   worstPerformer: {
     investmentId: string;
     name: string;
-    returnRate: number;
+    interestRate: number;
   };
   performanceByPeriod: {
     daily: number;

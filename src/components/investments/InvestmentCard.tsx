@@ -162,12 +162,12 @@ export default function InvestmentCard({ investment, onView, onEdit, onDelete }:
             {investment.returnType === 'FIXED' ? (
               <span className="flex items-center">
                 <Target className="h-3 w-3 mr-1" />
-                {investment.returnRate?.toFixed(2) || '0.00'}% fixed
+                {investment.interestRate?.toFixed(2) || '0.00'}% fixed
               </span>
             ) : (
               <span className="flex items-center">
                 <TrendingUp className="h-3 w-3 mr-1" />
-                {investment.returnRate?.toFixed(2) || 'Variable'}% variable
+                {investment.interestRate?.toFixed(2) || 'Variable'}% variable
               </span>
             )}
           </div>

@@ -27,7 +27,7 @@ interface DashboardData {
     bestPerformer: {
       id: string;
       name: string;
-      returnRate: number;
+      interestRate: number;
     };
   };
   assetAllocation: {
@@ -117,7 +117,7 @@ const mapApiToDashboardData = (api: ApiDashboardData): DashboardData => {
       bestPerformer: {
         id: best?.id ?? '',
         name: best?.name ?? '-',
-        returnRate: Number(best?.returnPercentage ?? 0),
+        interestRate: Number(best?.returnPercentage ?? 0),
       },
     },
     assetAllocation: api?.assetAllocation || {},
@@ -161,7 +161,7 @@ export default function DashboardOverview() {
             bestPerformer: {
               id: '1',
               name: 'Tech Growth Fund',
-              returnRate: 15.2
+              interestRate: 15.2
             }
           },
           assetAllocation: {
@@ -334,7 +334,7 @@ export default function DashboardOverview() {
                       {dashboardData?.performance?.bestPerformer?.name ?? '-'}
                     </p>
                     <p className="text-sm text-green-600">
-                      {formatPercent(dashboardData?.performance?.bestPerformer?.returnRate)}
+                      {formatPercent(dashboardData?.performance?.bestPerformer?.interestRate)}
                     </p>
                   </div>
                   <Award className="h-8 w-8 text-yellow-500" />

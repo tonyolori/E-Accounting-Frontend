@@ -66,7 +66,7 @@ export default function PerformanceOverview({ analytics }: PerformanceOverviewPr
         </div>
       </div>
 
-      {/* Average Return Rate */}
+      {/* Average Interest Rate */}
       <div className="bg-white overflow-hidden shadow rounded-lg">
         <div className="p-5">
           <div className="flex items-center">
@@ -76,10 +76,10 @@ export default function PerformanceOverview({ analytics }: PerformanceOverviewPr
             <div className="ml-5 w-0 flex-1">
               <dl>
                 <dt className="text-sm font-medium text-gray-500 truncate">
-                  Average Return Rate
+                  Average Interest Rate
                 </dt>
-                <dd className={`text-lg font-medium ${analytics.averageReturnRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
-                  {formatPercent(analytics.averageReturnRate)}
+                <dd className={`text-lg font-medium ${analytics.averageInterestRate >= 0 ? 'text-green-600' : 'text-red-600'}`}>
+                  {formatPercent(analytics.averageInterestRate)}
                 </dd>
               </dl>
             </div>
@@ -103,7 +103,7 @@ export default function PerformanceOverview({ analytics }: PerformanceOverviewPr
                   {analytics.bestPerformer.name}
                 </dd>
                 <dd className="text-sm text-green-600">
-                  {formatPercent(analytics.bestPerformer.returnRate)}
+                  {formatPercent(analytics.bestPerformer.interestRate)}
                 </dd>
               </dl>
             </div>

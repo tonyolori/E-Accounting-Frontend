@@ -186,7 +186,7 @@ Build a comprehensive dashboard frontend for the E-Accounting web application us
 
 #### 6.1 Build Returns Overview
 - Create returns summary dashboard using `/api/returns/summary`
-- Display total returns, average return rate, best performer
+- Display total returns, average Interest Rate, best performer
 - Show returns by investment type breakdown
 - Add returns history table for specific investments
 

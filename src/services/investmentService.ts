@@ -35,8 +35,8 @@ export const investmentService = {
       // API uses currentAmount
       currentBalance: item.currentAmount ?? item.currentBalance ?? 0,
       startDate: item.startDate,
-      // Map expectedReturn to our returnRate if present
-      returnRate: typeof item.expectedReturn === 'number' ? item.expectedReturn : (typeof item.returnRate === 'number' ? item.returnRate : null),
+      // Map expectedReturn to our interestRate if present
+      interestRate: typeof item.expectedReturn === 'number' ? item.expectedReturn : (typeof item.interestRate === 'number' ? item.interestRate : null),
       // API has no returnType; default to VARIABLE so manual updates are allowed for variable flows
       returnType: item.returnType === 'FIXED' || item.returnType === 'VARIABLE' ? item.returnType : 'VARIABLE',
       status: mapStatus(item.status),

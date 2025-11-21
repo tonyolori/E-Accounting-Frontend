@@ -27,7 +27,7 @@ export default function Returns() {
 
   const [filters, setFilters] = useState<ReturnFilters>({
     period: 'MONTHLY',
-    sortBy: 'totalReturnRate',
+    sortBy: 'totalInterestRate',
     sortOrder: 'desc',
   });
 
@@ -53,16 +53,16 @@ export default function Returns() {
         totalInvestments: 3,
         totalValue: 32700,
         totalReturns: 4200,
-        averageReturnRate: 14.7,
+        averageInterestRate: 14.7,
         bestPerformer: {
           investmentId: 'inv-1',
           name: 'Tech Growth Fund',
-          returnRate: 18.5
+          interestRate: 18.5
         },
         worstPerformer: {
           investmentId: 'inv-2',
           name: 'Government Bonds',
-          returnRate: 4.2
+          interestRate: 4.2
         },
         performanceByPeriod: {
           daily: 0.05,
@@ -82,7 +82,7 @@ export default function Returns() {
           initialAmount: 10000,
           currentValue: 12500,
           totalReturn: 2500,
-          totalReturnRate: 25.0,
+          totalInterestRate: 25.0,
           dailyReturn: 0.12,
           weeklyReturn: 0.85,
           monthlyReturn: 3.2,
@@ -90,7 +90,7 @@ export default function Returns() {
           yearlyReturn: 25.0,
           metrics: {
             totalReturn: 2500,
-            totalReturnRate: 25.0,
+            totalInterestRate: 25.0,
             annualizedReturn: 18.5,
             volatility: 15.2,
             sharpeRatio: 1.22,
@@ -107,7 +107,7 @@ export default function Returns() {
           initialAmount: 5000,
           currentValue: 5200,
           totalReturn: 200,
-          totalReturnRate: 4.0,
+          totalInterestRate: 4.0,
           dailyReturn: 0.01,
           weeklyReturn: 0.08,
           monthlyReturn: 0.33,
@@ -115,7 +115,7 @@ export default function Returns() {
           yearlyReturn: 4.0,
           metrics: {
             totalReturn: 200,
-            totalReturnRate: 4.0,
+            totalInterestRate: 4.0,
             annualizedReturn: 4.2,
             volatility: 2.1,
             sharpeRatio: 0.85,
@@ -137,7 +137,7 @@ export default function Returns() {
           initialAmount: 10000,
           currentBalance: 12500,
           startDate: '2024-01-01',
-          returnRate: 15.2,
+          interestRate: 15.2,
           returnType: 'VARIABLE',
           status: 'ACTIVE',
           createdAt: '2024-01-01T00:00:00.000Z',
@@ -178,17 +178,17 @@ export default function Returns() {
     let bValue: number;
 
     switch (sortBy) {
-      case 'totalReturnRate':
-        aValue = a.totalReturnRate;
-        bValue = b.totalReturnRate;
+      case 'totalInterestRate':
+        aValue = a.totalInterestRate;
+        bValue = b.totalInterestRate;
         break;
       case 'returnAmount':
         aValue = a.totalReturn;
         bValue = b.totalReturn;
         break;
       default:
-        aValue = a.totalReturnRate;
-        bValue = b.totalReturnRate;
+        aValue = a.totalInterestRate;
+        bValue = b.totalInterestRate;
     }
 
     return sortOrder === 'asc' ? aValue - bValue : bValue - aValue;
@@ -287,16 +287,16 @@ export default function Returns() {
                 <div className="flex space-x-2">
                   <Select
                     options={[
-                      { value: 'totalReturnRate', label: 'Return Rate' },
+                      { value: 'totalInterestRate', label: 'Interest Rate' },
                       { value: 'returnAmount', label: 'Return Amount' },
                     ]}
-                    value={filters.sortBy || 'totalReturnRate'}
+                    value={filters.sortBy || 'totalInterestRate'}
                     onChange={(e) => handleFilterChange('sortBy', e.target.value)}
                   />
                   <Button
                     variant="outline"
                     size="sm"
-                    onClick={() => handleSortChange(filters.sortBy || 'totalReturnRate')}
+                    onClick={() => handleSortChange(filters.sortBy || 'totalInterestRate')}
                     className="px-2"
                   >
                     {filters.sortOrder === 'asc' ? (

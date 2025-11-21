@@ -30,7 +30,7 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
     initialAmount: investment?.initialAmount?.toString() || '',
     currentBalance: investment?.currentBalance?.toString() || '',
     startDate: investment?.startDate ? investment.startDate.split('T')[0] : '',
-    returnRate: investment?.returnRate?.toString() || '',
+    interestRate: investment?.interestRate?.toString() || '',
     returnType: investment?.returnType || 'FIXED',
     status: investment?.status || 'ACTIVE',
     description: investment?.description || '',
@@ -73,21 +73,21 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
       newErrors.returnType = 'Return type is required';
     }
 
-    // Only validate returnRate if returnType is FIXED
+    // Only validate interestRate if returnType is FIXED
     if (formData.returnType === 'FIXED') {
-      if (!formData.returnRate || formData.returnRate.trim() === '') {
-        newErrors.returnRate = 'Interest rate is required for fixed return investments';
-      } else if (parseFloat(formData.returnRate) < 0) {
-        newErrors.returnRate = 'Interest rate cannot be negative';
-      } else if (parseFloat(formData.returnRate) > 100) {
-        newErrors.returnRate = 'Interest rate cannot exceed 100%';
+      if (!formData.interestRate || formData.interestRate.trim() === '') {
+        newErrors.interestRate = 'Interest rate is required for fixed return investments';
+      } else if (parseFloat(formData.interestRate) < 0) {
+        newErrors.interestRate = 'Interest rate cannot be negative';
+      } else if (parseFloat(formData.interestRate) > 100) {
+        newErrors.interestRate = 'Interest rate cannot exceed 100%';
       }
-    } else if (formData.returnRate && formData.returnRate.trim() !== '') {
+    } else if (formData.interestRate && formData.interestRate.trim() !== '') {
       // For VARIABLE type, if provided, still validate range
-      if (parseFloat(formData.returnRate) < 0) {
-        newErrors.returnRate = 'Interest rate cannot be negative';
-      } else if (parseFloat(formData.returnRate) > 100) {
-        newErrors.returnRate = 'Interest rate cannot exceed 100%';
+      if (parseFloat(formData.interestRate) < 0) {
+        newErrors.interestRate = 'Interest rate cannot be negative';
+      } else if (parseFloat(formData.interestRate) > 100) {
+        newErrors.interestRate = 'Interest rate cannot exceed 100%';
       }
     }
 
@@ -112,8 +112,8 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
         initialAmount: parseFloat(formData.initialAmount),
         startDate: formData.startDate,
         returnType: formData.returnType as any,
-        returnRate: formData.returnRate && formData.returnRate.trim() !== '' 
-          ? parseFloat(formData.returnRate) 
+        interestRate: formData.interestRate && formData.interestRate.trim() !== '' 
+          ? parseFloat(formData.interestRate) 
           : null,
         description: formData.description.trim() || undefined,
       };
@@ -326,30 +326,30 @@ export default function InvestmentForm({ investment, onSuccess, onCancel }: Inve
           {errors.fields.startDate && <p className="text-sm text-red-600 mt-1">{errors.fields.startDate}</p>}
         </div>
 
-        {/* Return Rate */}
+        {/* Interest Rate */}
         <div>
-          <Label htmlFor="returnRate">
-            {formData.returnType === 'FIXED' ? 'Interest Rate (%) *' : 'Expected Return Rate (%)'}
+          <Label htmlFor="interestRate">
+            {formData.returnType === 'FIXED' ? 'Interest Rate (%) *' : 'Expected Interest Rate (%)'}
             {formData.returnType === 'FIXED' && (
               <span className="text-xs text-gray-500 ml-1">(Required for fixed returns)</span>
             )}
           </Label>
           <Input
-            id="returnRate"
+            id="interestRate"
             type="number"
             step="0.01"
             min="0"
             max="100"
-            value={formData.returnRate}
-            onChange={(e) => handleInputChange('returnRate', e.target.value)}
+            value={formData.interestRate}
+            onChange={(e) => handleInputChange('interestRate', e.target.value)}
             placeholder={formData.returnType === 'FIXED' ? 'Enter interest rate' : 'Optional - leave empty for variable returns'}
-            className={errors.fields.returnRate ? 'border-red-300' : ''}
+            className={errors.fields.interestRate ? 'border-red-300' : ''}
             required={formData.returnType === 'FIXED'}
           />
-          {errors.fields.returnRate && <p className="text-sm text-red-600 mt-1">{errors.fields.returnRate}</p>}
+          {errors.fields.interestRate && <p className="text-sm text-red-600 mt-1">{errors.fields.interestRate}</p>}
           {formData.returnType === 'VARIABLE' && (
             <p className="text-xs text-gray-500 mt-1">
-              Optional: Provide an estimated return rate for reference. Variable returns fluctuate based on market conditions.
+              Optional: Provide an estimated Interest Rate for reference. Variable returns fluctuate based on market conditions.
             </p>
           )}
         </div>
